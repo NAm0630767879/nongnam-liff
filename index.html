@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>สั่งเครื่องดื่ม - ร้านน้ำชงน้องน้ำ</title>
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "Segoe UI", "Noto Sans Thai", sans-serif;
+      background: #f6f3ee;
+      margin: 0;
+      padding: 16px;
+      color: #2b2620;
+    }
+    h2 { margin: 4px 0 16px; font-size: 20px; }
+    h3 { margin: 20px 0 8px; font-size: 16px; }
+    #status {
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    #status.loading { background: #eee; color: #666; }
+    #status.error { background: #fdeaea; color: #b3261e; }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #fff;
+      border: 1px solid #e5ded2;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+    }
+    .menu-item img {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #eee;
+      flex-shrink: 0;
+    }
+    .menu-item .info { flex: 1; min-width: 0; }
+    .menu-item .name { font-weight: 600; }
+    .menu-item .price { color: #7a7264; font-size: 13px; }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px dashed #e5ded2;
+      font-size: 14px;
+    }
+    .cart-empty { color: #999; font-size: 14px; }
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      margin: 12px 0;
+      font-size: 16px;
+    }
+    label { display: block; font-size: 13px; color: #555; margin: 10px 0 4px; }
+    input[type="text"], input[type="tel"], textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    textarea { resize: vertical; min-height: 50px; }
+    .payment-options { display: flex; gap: 8px; margin-top: 6px; }
+    .payment-options label {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 0;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .payment-options input { margin: 0; }
+    #slipSection { display: none; margin-top: 10px; }
+    #slipPreview {
+      max-width: 160px;
+      max-height: 160px;
+      border-radius: 8px;
+      margin-top: 8px;
+      display: none;
+      border: 1px solid #ddd;
+    }
+    button {
+      background: #06c755;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    #confirmBtn {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 10px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🧋 ร้านน้ำชงน้องน้ำ</h2>
+  <div id="status" class="loading">กำลังโหลด...</div>
+
+  <div id="menuSection" style="display:none;">
+    <div id="menuList"></div>
+
+    <h3>ตะกร้าสินค้า</h3>
+    <div id="cart"><div class="cart-empty">ยังไม่มีรายการในตะกร้า</div></div>
+    <div class="total-row">
+      <span>ยอดรวม</span>
+      <span><span id="total">0</span> บาท</span>
+    </div>
+
+    <h3>ข้อมูลผู้สั่งซื้อ</h3>
+    <label for="custName">ชื่อผู้รับ</label>
+    <input type="text" id="custName" placeholder="ชื่อ-นามสกุล">
+
+    <label for="custTel">เบอร์โทรศัพท์</label>
+    <input type="tel" id="custTel" placeholder="0812345678">
+
+    <h3>วิธีการชำระเงิน</h3>
+    <div class="payment-options">
+      <label>
+        <input type="radio" name="paymentMethod" value="โอนเงิน" onchange="onPaymentChange()">
+        โอนเงิน
+      </label>
+      <label>
+        <input type="radio" name="paymentMethod" value="ชำระที่ร้าน" onchange="onPaymentChange()" checked>
+        ชำระที่ร้าน
+      </label>
+    </div>
+
+    <div id="slipSection">
+      <label for="slipInput">แนบสลิปการโอนเงิน</label>
+      <input type="file" id="slipInput" accept="image/*" onchange="onSlipSelected(event)">
+      <img id="slipPreview">
+    </div>
+
+    <button id="confirmBtn" onclick="confirmOrder()">ยืนยันคำสั่งซื้อ</button>
+  </div>
+
+  <script>
+    // API_URL ใช้ origin+pathname ของหน้านี้เอง (กันปัญหา query parameters ที่ LIFF อาจเพิ่มมา เช่น liff.state)
+    const API_URL = window.location.origin + window.location.pathname;
+    const LIFF_ID = '2011058922-zZ7LXynR';
+
+    let cart = [];
+    let profile = null;
+    let slipBase64 = null;
+
+    function setStatus(text, type) {
+      const el = document.getElementById('status');
+      el.textContent = text;
+      el.className = type || '';
+      el.style.display = text ? 'block' : 'none';
+    }
+
+    async function init() {
+      const timeoutId = setTimeout(() => {
+        setStatus('เชื่อมต่อ LINE ไม่สำเร็จภายในเวลาที่กำหนด กรุณาตรวจสอบ LIFF Endpoint URL และ Scope', 'error');
+        console.error('LIFF timeout');
+        console.log('Current URL:', window.location.href);
+        console.log('LIFF ID:', LIFF_ID);
+      }, 10000);
+
+      try {
+        setStatus('กำลังเชื่อมต่อ LINE...', 'loading');
+        console.log('LIFF ID:', LIFF_ID);
+        console.log('Current URL:', window.location.href);
+
+        await liff.init({
+          liffId: LIFF_ID,
+          withLoginOnExternalBrowser: true
+        });
+
+        clearTimeout(timeoutId);
+
+        console.log('LIFF initialized');
+        console.log('isInClient:', liff.isInClient());
+        console.log('isLoggedIn:', liff.isLoggedIn());
+        console.log('OS:', liff.getOS());
+        console.log('Language:', liff.getLanguage());
+
+        if (!liff.isLoggedIn()) {
+          setStatus('กำลังเข้าสู่ระบบ LINE...', 'loading');
+          liff.login({ redirectUri: window.location.href });
+          return;
+        }
+
+        if (!liff.isApiAvailable('getProfile')) {
+          throw new Error('LIFF ไม่มีสิทธิ์ profile กรุณาเปิด Scope: profile ใน LINE Developers');
+        }
+
+        profile = await liff.getProfile();
+        console.log('LINE Profile:', profile);
+        console.log('LINE User ID:', profile.userId);
+
+        await loadMenu();
+      } catch (err) {
+        clearTimeout(timeoutId);
+        console.error('LIFF ERROR:', err);
+
+        let message = 'เกิดข้อผิดพลาดในการเชื่อมต่อ LINE';
+        if (err && err.code) message += `\nCode: ${err.code}`;
+        if (err && err.message) message += `\n${err.message}`;
+        setStatus(message, 'error');
+      }
+    }
+
+    async function loadMenu() {
+      try {
+        setStatus('กำลังโหลดเมนู...', 'loading');
+        console.log('API URL:', API_URL);
+
+        const res = await fetch(API_URL + '?action=getMenu', { method: 'GET', cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP Error ' + res.status);
+
+        const json = await res.json();
+        console.log('Menu API:', json);
+
+        if (!json.ok) throw new Error(json.error || 'โหลดเมนูไม่สำเร็จ');
+
+        const menu = json.data.menu || [];
+        if (menu.length === 0) {
+          setStatus('ขณะนี้ยังไม่มีเมนูในระบบ', 'error');
+          return;
+        }
+
+        document.getElementById('menuList').innerHTML = menu.map(m => `
+          <div class="menu-item">
+            ${m.img ? `<img src="${m.img}" alt="${m.name}" onerror="this.style.display='none'">` : ''}
+            <div class="info">
+              <div class="name">${m.name}</div>
+              <div class="price">${m.price} บาท</div>
+            </div>
+            <button onclick='addToCart(${JSON.stringify(m)})'>เพิ่ม</button>
+          </div>
+        `).join('');
+
+        document.getElementById('menuSection').style.display = 'block';
+        setStatus('', '');
+      } catch (err) {
+        console.error('LOAD MENU ERROR:', err);
+        setStatus('โหลดเมนูไม่สำเร็จ: ' + (err.message || err), 'error');
+      }
+    }
+
+    function addToCart(item) {
+      cart.push(item);
+      renderCart();
+    }
+
+    function renderCart() {
+      const cartEl = document.getElementById('cart');
+      if (cart.length === 0) {
+        cartEl.innerHTML = '<div class="cart-empty">ยังไม่มีรายการในตะกร้า</div>';
+      } else {
+        cartEl.innerHTML = cart.map((c, i) => `
+          <div class="cart-item">
+            <span>${c.name}</span>
+            <span>${c.price} บาท <a href="#" onclick="removeItem(${i}); return false;" style="color:#b3261e; margin-left:8px;">ลบ</a></span>
+          </div>
+        `).join('');
+      }
+      const total = cart.reduce((s, c) => s + Number(c.price), 0);
+      document.getElementById('total').textContent = total;
+    }
+
+    function removeItem(index) {
+      cart.splice(index, 1);
+      renderCart();
+    }
+
+    function onPaymentChange() {
+      const method = document.querySelector('input[name="paymentMethod"]:checked').value;
+      document.getElementById('slipSection').style.display = (method === 'โอนเงิน') ? 'block' : 'none';
+    }
+
+    function onSlipSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        slipBase64 = e.target.result; // data:image/...;base64,xxxx
+        const preview = document.getElementById('slipPreview');
+        preview.src = slipBase64;
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function confirmOrder() {
+      if (cart.length === 0) {
+        alert('กรุณาเลือกเมนูก่อนยืนยันคำสั่งซื้อ');
+        return;
+      }
+
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+      if (paymentMethod === 'โอนเงิน' && !slipBase64) {
+        alert('กรุณาแนบสลิปการโอนเงิน');
+        return;
+      }
+
+      const btn = document.getElementById('confirmBtn');
+      btn.disabled = true;
+      btn.textContent = 'กำลังส่งคำสั่งซื้อ...';
+
+      const total = cart.reduce((s, c) => s + Number(c.price), 0);
+      const payload = {
+        action: 'createOrder',
+        userId: profile.userId,
+        name: document.getElementById('custName').value,
+        telephone: document.getElementById('custTel').value,
+        items: cart,
+        totalPrice: total,
+        paymentMethod: paymentMethod,
+        image: paymentMethod === 'โอนเงิน' ? slipBase64 : null
+      };
+
+      try {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const json = await res.json();
+
+        if (json.ok) {
+          alert('สั่งซื้อสำเร็จ! 🎉\nหมายเลขคำสั่งซื้อ: ' + json.orderId);
+          cart = [];
+          slipBase64 = null;
+          renderCart();
+          liff.closeWindow();
+        } else {
+          throw new Error(json.error || 'สั่งซื้อไม่สำเร็จ');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('เกิดข้อผิดพลาด: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'ยืนยันคำสั่งซื้อ';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
