@@ -203,10 +203,6 @@
           return;
         }
 
-        if (!liff.isApiAvailable('getProfile')) {
-          throw new Error('LIFF ไม่มีสิทธิ์ profile กรุณาเปิด Scope: profile ใน LINE Developers');
-        }
-
         profile = await liff.getProfile();
         console.log('LINE Profile:', profile);
         console.log('LINE User ID:', profile.userId);
