@@ -158,8 +158,9 @@
   </div>
 
   <script>
-    // API_URL ใช้ origin+pathname ของหน้านี้เอง (กันปัญหา query parameters ที่ LIFF อาจเพิ่มมา เช่น liff.state)
-    const API_URL = window.location.origin + window.location.pathname;
+    // API_URL ชี้ไปที่ Web App URL ของ Google Apps Script (Backend) โดยตรง
+    // เพราะหน้าเว็บนี้โฮสต์แยกต่างหากผ่าน GitHub Pages
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyXd7Vht8MRECpCWk1XyyVmoB4JSxJFYZBiGuQS027Xq5QHoeyy4LxSIT1rl50u1_sO/exec';
     const LIFF_ID = '2011058922-zZ7LXynR';
 
     let cart = [];
@@ -186,10 +187,7 @@
         console.log('LIFF ID:', LIFF_ID);
         console.log('Current URL:', window.location.href);
 
-        await liff.init({
-          liffId: LIFF_ID,
-          withLoginOnExternalBrowser: true
-        });
+        await liff.init({ liffId: LIFF_ID });
 
         clearTimeout(timeoutId);
 
@@ -201,7 +199,7 @@
 
         if (!liff.isLoggedIn()) {
           setStatus('กำลังเข้าสู่ระบบ LINE...', 'loading');
-          liff.login({ redirectUri: window.location.href });
+          liff.login();
           return;
         }
 
