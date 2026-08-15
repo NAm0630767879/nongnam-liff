@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ทดสอบ LIFF</title>
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body style="font-family: sans-serif; padding: 16px;">
+  <h2>ทดสอบ LIFF ขั้นต่ำสุด</h2>
+  <div id="result" style="white-space: pre-wrap; background: #eee; padding: 12px; border-radius: 8px;">กำลังทดสอบ...</div>
+
+  <script>
+    const LIFF_ID = '2011058922-zZ7LXynR';
+    const el = document.getElementById('result');
+    let log = [];
+
+    function addLog(text) {
+      log.push(text);
+      el.textContent = log.join('\n');
+    }
+
+    async function test() {
+      addLog('1. เริ่มทดสอบ liff.init()...');
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        addLog('2. liff.init() สำเร็จ! ✅');
+
+        addLog('3. เช็ค isLoggedIn: ' + liff.isLoggedIn());
+        addLog('4. เช็ค isInClient: ' + liff.isInClient());
+
+        if (!liff.isLoggedIn()) {
+          addLog('5. ยังไม่ login กำลังเรียก liff.login()...');
+          liff.login();
+          return;
+        }
+
+        addLog('5. ล็อกอินอยู่แล้ว กำลังเรียก getProfile()...');
+        const profile = await liff.getProfile();
+        addLog('6. getProfile() สำเร็จ! ✅');
+        addLog('User ID: ' + profile.userId);
+        addLog('Display Name: ' + profile.displayName);
+
+      } catch (err) {
+        addLog('❌ ERROR เกิดขึ้น:');
+        addLog('Code: ' + (err && err.code));
+        addLog('Message: ' + (err && err.message));
+        addLog('Full: ' + JSON.stringify(err));
+      }
+    }
+
+    test();
+  </script>
+</body>
+</html>
