@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - ร้านน้ำชงน้องน้ำ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --brand: #4a3728;
+    --brand-light: #8a6f5c;
+    --accent: #c98a4b;
+    --accent2: #7fae6f;
+    --accent-dark: #a86f36;
+    --bg: #faf6f0;
+    --card: #ffffff;
+    --line: #ece3d8;
+    --danger: #c94b4b;
+    --ok: #4a8a5c;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai", sans-serif;
+    background: var(--bg);
+    color: var(--brand);
+    padding-bottom: 40px;
+    min-height: 100vh;
+  }
+
+  /* ---------- หน้า Login ---------- */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(201,138,75,0.25), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(127,174,111,0.25), transparent 45%),
+      linear-gradient(160deg, #4a3728, #2f231a 70%);
+    padding: 24px;
+  }
+  .login-card {
+    width: 100%; max-width: 360px;
+    background: rgba(255,255,255,0.97);
+    border-radius: 24px;
+    padding: 32px 26px 28px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .login-card::before {
+    content: "";
+    position: absolute; top: -60px; right: -60px;
+    width: 160px; height: 160px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,138,75,0.18), transparent 70%);
+  }
+  .login-logo {
+    width: 78px; height: 78px; border-radius: 50%;
+    object-fit: cover; margin: 0 auto 14px;
+    border: 3px solid #fff;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  }
+  .login-title { font-size: 19px; font-weight: 800; color: var(--brand); }
+  .login-sub { font-size: 12.5px; color: var(--brand-light); margin-top: 4px; margin-bottom: 22px; }
+
+  .field-wrap { position: relative; margin-bottom: 12px; text-align: left; }
+  .field-wrap .icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    font-size: 15px; opacity: .55;
+  }
+  .field-wrap input {
+    width: 100%; padding: 13px 14px 13px 40px;
+    border: 1.5px solid var(--line); border-radius: 12px;
+    font-size: 14.5px; background: #fbf8f4;
+    outline: none; transition: border-color .15s;
+  }
+  .field-wrap input:focus { border-color: var(--accent); background: #fff; }
+
+  #loginBtn {
+    width: 100%; padding: 14px; margin-top: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff; border: none; border-radius: 12px;
+    font-weight: 800; font-size: 15px; cursor: pointer;
+    box-shadow: 0 8px 18px rgba(168,111,54,0.35);
+  }
+  #loginBtn:active { transform: translateY(1px); }
+  #loginError {
+    color: var(--danger); font-size: 12.5px; margin-top: 12px;
+    display: none; background: #fdeaea; padding: 8px; border-radius: 8px;
+  }
+
+  /* ---------- Dashboard ---------- */
+  header {
+    background: linear-gradient(135deg, #6b4a35, #3f2e21);
+    color: #fff;
+    padding: 20px 20px 24px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    border-radius: 0 0 22px 22px;
+  }
+  header img { width: 46px; height: 46px; border-radius: 50%; border: 2px solid rgba(255,255,255,.6); flex-shrink: 0; }
+  header .t { font-size: 17px; font-weight: 800; }
+  header .s { font-size: 12px; opacity: .85; }
+  #logoutBtn {
+    margin-left: auto; background: rgba(255,255,255,0.15); border: none;
+    color: #fff; padding: 8px 14px; border-radius: 18px; font-size: 12.5px; cursor: pointer;
+  }
+
+  main { padding: 16px; max-width: 720px; margin: 0 auto; }
+
+  .stats-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .stat-card {
+    flex: 1; background: var(--card); border-radius: 14px; padding: 12px 10px;
+    text-align: center; border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .stat-card .num { font-size: 20px; font-weight: 800; }
+  .stat-card .lbl { font-size: 11px; color: var(--brand-light); margin-top: 2px; }
+  .stat-card.c-รอชง .num { color: #a5690b; }
+  .stat-card.c-กำลังชง .num { color: #1c5fa8; }
+  .stat-card.c-พร้อมรับ .num { color: var(--ok); }
+
+  .toolbar { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
+  .filter-chip {
+    flex-shrink: 0; padding: 8px 14px; border-radius: 20px; border: 1.5px solid var(--line);
+    background: #fff; font-size: 13px; cursor: pointer; white-space: nowrap;
+  }
+  .filter-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+
+  #refreshBtn {
+    margin-left: auto; flex-shrink: 0;
+    background: var(--brand); color: #fff; border: none; border-radius: 20px;
+    padding: 8px 14px; font-size: 13px; cursor: pointer;
+  }
+
+  #status { padding: 10px 14px; border-radius: 10px; font-size: 13.5px; margin-bottom: 12px; }
+  #status.loading { background: #f1ece3; color: #6b5a48; }
+  #status.error { background: #fdeaea; color: var(--danger); }
+
+  .order-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    border-left: 4px solid var(--accent);
+  }
+  .order-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .order-id { font-weight: 800; font-size: 14.5px; }
+  .order-time { font-size: 11.5px; color: var(--brand-light); margin-top: 2px; }
+  .order-price { font-weight: 800; font-size: 16px; color: var(--accent-dark); white-space: nowrap; }
+
+  .badge-row { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
+  .badge { font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
+  .badge.status-รอชง { background: #fff0da; color: #a5690b; }
+  .badge.status-กำลังชง { background: #e2f0ff; color: #1c5fa8; }
+  .badge.status-พร้อมรับ { background: #e3f6e6; color: var(--ok); }
+  .badge.pay-รอตรวจสอบสลิป { background: #fdeaea; color: var(--danger); }
+  .badge.pay-รอชำระที่ร้าน { background: #fff0da; color: #a5690b; }
+  .badge.pay-ชำระแล้ว { background: #e3f6e6; color: var(--ok); }
+
+  .order-items { font-size: 13px; color: var(--brand-light); margin: 6px 0; line-height: 1.6; }
+  .order-cust { font-size: 12.5px; color: var(--brand-light); margin-bottom: 6px; }
+
+  .order-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .order-actions select, .order-actions .slip-link {
+    flex: 1; min-width: 120px;
+    padding: 9px 10px; border-radius: 10px; border: 1.5px solid var(--line);
+    font-size: 13px; background: #fff; text-align: center; text-decoration: none; color: var(--brand);
+  }
+  .order-actions .slip-link { background: #fdf3e8; border-color: var(--accent); color: var(--accent-dark); font-weight: 700; }
+
+  .empty-state { text-align: center; color: #999; padding: 40px 0; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <img src="logo.png" class="login-logo" alt="โลโก้ร้าน">
+    <div class="login-title">ระบบจัดการร้าน</div>
+    <div class="login-sub">ร้านน้ำชงน้องน้ำ 🧋</div>
+
+    <div class="field-wrap">
+      <span class="icon">👤</span>
+      <input type="text" id="userInput" placeholder="ชื่อผู้ใช้">
+    </div>
+    <div class="field-wrap">
+      <span class="icon">🔒</span>
+      <input type="password" id="pwInput" placeholder="รหัสผ่าน">
+    </div>
+
+    <button id="loginBtn" onclick="tryLogin()">เข้าสู่ระบบ</button>
+    <div id="loginError">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+  </div>
+</div>
+
+<div id="dashboardScreen" style="display:none;">
+  <header>
+    <img src="logo.png" alt="โลโก้">
+    <div>
+      <div class="t">ร้านน้ำชงน้องน้ำ</div>
+      <div class="s">หน้าจัดการคำสั่งซื้อ</div>
+    </div>
+    <button id="logoutBtn" onclick="logout()">ออกจากระบบ</button>
+  </header>
+
+  <main>
+    <div class="stats-row">
+      <div class="stat-card c-รอชง"><div class="num" id="statRoChong">0</div><div class="lbl">รอชง</div></div>
+      <div class="stat-card c-กำลังชง"><div class="num" id="statGamlangChong">0</div><div class="lbl">กำลังชง</div></div>
+      <div class="stat-card c-พร้อมรับ"><div class="num" id="statProm">0</div><div class="lbl">พร้อมรับ</div></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="filter-chip active" data-f="all" onclick="setFilter('all')">ทั้งหมด</div>
+      <div class="filter-chip" data-f="รอชง" onclick="setFilter('รอชง')">รอชง</div>
+      <div class="filter-chip" data-f="กำลังชง" onclick="setFilter('กำลังชง')">กำลังชง</div>
+      <div class="filter-chip" data-f="พร้อมรับ" onclick="setFilter('พร้อมรับ')">พร้อมรับ</div>
+      <button id="refreshBtn" onclick="loadOrders()">🔄 รีเฟรช</button>
+    </div>
+
+    <div id="status" style="display:none;"></div>
+    <div id="orderList"></div>
+  </main>
+</div>
+
+<script>
+  const API_URL = 'https://script.google.com/macros/s/AKfycbyXd7Vht8MRECpCWk1XyyVmoB4JSxJFYZBiGuQS027Xq5QHoeyy4LxSIT1rl50u1_sO/exec';
+
+  // เปลี่ยนชื่อผู้ใช้/รหัสผ่านตรงนี้ได้ตามต้องการ
+  const ADMIN_USERNAME = 'nongnam';
+  const ADMIN_PASSWORD = 'nongnam2569';
+
+  let allOrders = [];
+  let currentFilter = 'all';
+
+  function tryLogin() {
+    const user = document.getElementById('userInput').value.trim();
+    const pw = document.getElementById('pwInput').value;
+    if (user === ADMIN_USERNAME && pw === ADMIN_PASSWORD) {
+      sessionStorage.setItem('nn_admin_ok', '1');
+      document.getElementById('loginError').style.display = 'none';
+      showDashboard();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  }
+
+  ['userInput', 'pwInput'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') tryLogin();
+    });
+  });
+
+  function logout() {
+    sessionStorage.removeItem('nn_admin_ok');
+    document.getElementById('dashboardScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('pwInput').value = '';
+  }
+
+  function showDashboard() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboardScreen').style.display = 'block';
+    loadOrders();
+  }
+
+  if (sessionStorage.getItem('nn_admin_ok') === '1') {
+    showDashboard();
+  }
+
+  function setStatus(text, type) {
+    const el = document.getElementById('status');
+    el.textContent = text;
+    el.className = type || '';
+    el.style.display = text ? 'block' : 'none';
+  }
+
+  async function loadOrders() {
+    try {
+      setStatus('กำลังโหลดรายการสั่งซื้อ...', 'loading');
+      const res = await fetch(API_URL + '?action=getAllOrders', { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP Error ' + res.status);
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || 'โหลดข้อมูลไม่สำเร็จ');
+
+      allOrders = json.data || [];
+      setStatus('', '');
+      renderStats();
+      renderOrders();
+    } catch (err) {
+      setStatus('โหลดข้อมูลไม่สำเร็จ: ' + (err.message || err), 'error');
+    }
+  }
+
+  function renderStats() {
+    document.getElementById('statRoChong').textContent = allOrders.filter(o => o.orderStatus === 'รอชง').length;
+    document.getElementById('statGamlangChong').textContent = allOrders.filter(o => o.orderStatus === 'กำลังชง').length;
+    document.getElementById('statProm').textContent = allOrders.filter(o => o.orderStatus === 'พร้อมรับ').length;
+  }
+
+  function setFilter(f) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.f === f);
+    });
+    renderOrders();
+  }
+
+  function renderOrders() {
+    const list = currentFilter === 'all'
+      ? allOrders
+      : allOrders.filter(o => o.orderStatus === currentFilter);
+
+    const el = document.getElementById('orderList');
+
+    if (list.length === 0) {
+      el.innerHTML = '<div class="empty-state">ไม่มีรายการสั่งซื้อในหมวดนี้</div>';
+      return;
+    }
+
+    el.innerHTML = list.map(o => {
+      const itemsText = (o.items || []).map(i => {
+        const detail = [];
+        if (i.sweetness) detail.push(i.sweetness);
+        if (i.toppings) detail.push(i.toppings);
+        const detailText = detail.length ? ` (${detail.join(', ')})` : '';
+        return `${i.name} × ${i.qty}${detailText}`;
+      }).join(' · ');
+
+      const custText = [o.customerName, o.telephone].filter(Boolean).join(' · ');
+      const timeText = o.timestamp ? new Date(o.timestamp).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '';
+
+      return `
+        <div class="order-card">
+          <div class="order-top">
+            <div>
+              <div class="order-id">${o.orderId}</div>
+              <div class="order-time">${timeText}</div>
+            </div>
+            <div class="order-price">${o.totalPrice} บาท</div>
+          </div>
+
+          ${custText ? `<div class="order-cust">👤 ${custText}</div>` : ''}
+
+          <div class="badge-row">
+            <span class="badge status-${o.orderStatus}">${o.orderStatus || '-'}</span>
+            <span class="badge pay-${o.paymentStatus}">${o.paymentStatus || '-'}</span>
+            <span class="badge" style="background:#eee; color:#555;">${o.paymentMethod || '-'}</span>
+          </div>
+
+          <div class="order-items">${itemsText}</div>
+
+          <div class="order-actions">
+            <select onchange="updateStatus('${o.orderId}', this.value)">
+              <option value="">-- เปลี่ยนสถานะออเดอร์ --</option>
+              <option value="รอชง" ${o.orderStatus === 'รอชง' ? 'selected' : ''}>รอชง</option>
+              <option value="กำลังชง" ${o.orderStatus === 'กำลังชง' ? 'selected' : ''}>กำลังชง</option>
+              <option value="พร้อมรับ" ${o.orderStatus === 'พร้อมรับ' ? 'selected' : ''}>พร้อมรับ</option>
+            </select>
+            ${o.slipUrl ? `<a class="slip-link" href="${o.slipUrl}" target="_blank">🧾 ดูสลิป</a>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function updateStatus(orderId, newStatus) {
+    if (!newStatus) return;
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'updateOrderStatus', orderId, newStatus })
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || 'อัปเดตไม่สำเร็จ');
+      await loadOrders();
+    } catch (err) {
+      alert('เกิดข้อผิดพลาด: ' + (err.message || err));
+    }
+  }
+</script>
+</body>
+</html>
