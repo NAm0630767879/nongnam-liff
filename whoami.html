@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เช็ค LINE User ID</title>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+  body { font-family: -apple-system, "Segoe UI", "Noto Sans Thai", sans-serif; padding: 20px; background: #faf6f0; color: #4a3728; }
+  h2 { font-size: 18px; margin-bottom: 16px; }
+  #box {
+    background: #fff; border: 1.5px solid #ece3d8; border-radius: 14px;
+    padding: 18px; word-break: break-all; font-size: 16px; font-weight: 700;
+    margin-bottom: 12px; min-height: 24px;
+  }
+  #name { color: #8a6f5c; font-size: 14px; margin-bottom: 16px; }
+  button {
+    background: #c98a4b; color: #fff; border: none; padding: 12px 20px;
+    border-radius: 10px; font-size: 14px; font-weight: 700; width: 100%;
+  }
+  #status { color: #c94b4b; font-size: 13px; margin-top: 10px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+  <h2>🪪 เช็ค LINE User ID ของคุณ</h2>
+  <div id="name">กำลังโหลด...</div>
+  <div id="box">-</div>
+  <button onclick="copyId()">คัดลอก User ID</button>
+  <div id="status"></div>
+
+  <script>
+    const LIFF_ID = '2011058922-zZ7LXynR';
+    let myUserId = '';
+
+    async function init() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        if (!liff.isLoggedIn()) { liff.login(); return; }
+
+        const profile = await liff.getProfile();
+        myUserId = profile.userId;
+        document.getElementById('name').textContent = 'บัญชี: ' + profile.displayName;
+        document.getElementById('box').textContent = myUserId;
+      } catch (err) {
+        document.getElementById('status').textContent = 'เกิดข้อผิดพลาด: ' + (err.message || err);
+      }
+    }
+
+    function copyId() {
+      if (!myUserId) return;
+      navigator.clipboard.writeText(myUserId).then(() => {
+        document.getElementById('status').style.color = '#4a8a5c';
+        document.getElementById('status').textContent = 'คัดลอกแล้ว ✓';
+      }).catch(() => {
+        document.getElementById('status').textContent = 'คัดลอกไม่สำเร็จ กรุณาลากเลือกข้อความเองแล้วคัดลอก';
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
