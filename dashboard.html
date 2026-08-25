@@ -16,6 +16,10 @@
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai", sans-serif;
     background: var(--bg); color: var(--brand); padding-bottom: 40px; min-height: 100vh;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   /* ---------- Login ---------- */
@@ -127,12 +131,13 @@
 
   /* Expense tab */
   .form-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
-  .form-card h4 { font-size: 14px; margin-bottom: 10px; }
-  label.f-label { display: block; font-size: 12.5px; color: var(--brand-light); margin: 8px 0 4px; font-weight: 600; }
+  .form-card h4 { font-size: 15px; margin-bottom: 10px; }
+  label.f-label { display: block; font-size: 13.5px; color: var(--brand-light); margin: 10px 0 5px; font-weight: 700; }
   .form-card input {
-    width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; font-size: 14px; font-family: inherit;
+    width: 100%; padding: 13px 14px; border: 1.5px solid var(--line); border-radius: 10px; font-size: 16px; font-family: inherit;
   }
-  #addExpenseBtn { width: 100%; margin-top: 12px; padding: 12px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-weight: 800; font-size: 14px; }
+  #addExpenseBtn { width: 100%; margin-top: 14px; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-weight: 800; font-size: 16px; }
+  #addExpenseBtn:disabled { background: #cbb190; }
 
   .profit-summary { display: flex; gap: 10px; margin-bottom: 16px; }
   .profit-card { flex: 1; background: var(--card); border-radius: 14px; padding: 12px; text-align: center; border: 1px solid var(--line); }
@@ -213,6 +218,7 @@
     <div class="tab-page" id="tab-cost">
       <div class="form-card">
         <h4>➕ บันทึกรายจ่าย (ซื้อของเข้าร้าน)</h4>
+        <div style="font-size:12.5px; color:var(--brand-light); margin-bottom:10px;">กรอกยอดที่ซื้อของเข้าร้านในแต่ละวัน ระบบจะคำนวณกำไรให้อัตโนมัติค่ะ</div>
         <label class="f-label">วันที่</label>
         <input type="date" id="expDate">
         <label class="f-label">จำนวนเงิน (บาท)</label>
@@ -220,6 +226,7 @@
         <label class="f-label">รายการ / หมายเหตุ</label>
         <input type="text" id="expNote" placeholder="เช่น ซื้อนม, ไข่มุก, แก้ว">
         <button id="addExpenseBtn" onclick="addExpense()">บันทึกรายจ่าย</button>
+        <div id="expenseMsg" style="display:none; text-align:center; font-size:13.5px; font-weight:700; margin-top:10px;"></div>
       </div>
 
       <div class="profit-summary">
@@ -508,25 +515,43 @@
     const amount = Number(document.getElementById('expAmount').value);
     const note = document.getElementById('expNote').value;
 
-    if (!amount || amount <= 0) { alert('กรุณาระบุจำนวนเงินให้ถูกต้อง'); return; }
+    if (!amount || amount <= 0) {
+      showExpenseMsg('กรุณาใส่จำนวนเงินด้วยนะคะ', false);
+      return;
+    }
+
+    const btn = document.getElementById('addExpenseBtn');
+    btn.disabled = true;
+    btn.textContent = 'กำลังบันทึก...';
 
     try {
       const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addExpense', date, amount, note }) });
       const json = await res.json();
       if (!json.ok) throw new Error(json.error || 'บันทึกไม่สำเร็จ');
 
+      // เพิ่มรายการใหม่เข้าไปในหน่วยความจำทันที ไม่ต้องโหลดข้อมูลใหม่ทั้งหมด (เร็วกว่าเดิม)
+      allExpenses.unshift({ date: date, type: 'รายจ่าย', amount: amount, note: note });
+
       document.getElementById('expAmount').value = '';
       document.getElementById('expNote').value = '';
 
-      const expRes = await fetch(API_URL + '?action=getExpenses', { cache: 'no-store' });
-      const expJson = await expRes.json();
-      allExpenses = expJson.data || [];
-
       renderCostTab();
-      alert('บันทึกรายจ่ายเรียบร้อยแล้ว ✓');
+      showExpenseMsg('✓ บันทึกเรียบร้อยแล้วค่ะ', true);
     } catch (err) {
-      alert('เกิดข้อผิดพลาด: ' + (err.message || err));
+      showExpenseMsg('เกิดข้อผิดพลาด: ' + (err.message || err), false);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'บันทึกรายจ่าย';
     }
+  }
+
+  function showExpenseMsg(text, success) {
+    const el = document.getElementById('expenseMsg');
+    el.textContent = text;
+    el.style.color = success ? '#4a8a5c' : '#c94b4b';
+    el.style.display = 'block';
+    clearTimeout(window._expMsgTimer);
+    window._expMsgTimer = setTimeout(() => { el.style.display = 'none'; }, 3000);
   }
 
   function renderCostTab() {
