@@ -3,269 +3,149 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ร้านน้ำชงน้องน้ำ</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<title>Dashboard - ร้านน้ำชงน้องน้ำ</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --brand: #4a3728;
-    --brand-light: #8a6f5c;
-    --accent: #c98a4b;
-    --accent2: #7fae6f;
-    --accent-dark: #a86f36;
-    --bg: #faf6f0;
-    --card: #ffffff;
-    --line: #ece3d8;
-    --danger: #c94b4b;
-    --ok: #4a8a5c;
+    --brand: #4a3728; --brand-light: #8a6f5c;
+    --accent: #c98a4b; --accent2: #7fae6f; --accent-dark: #a86f36;
+    --bg: #faf6f0; --card: #ffffff; --line: #ece3d8;
+    --danger: #c94b4b; --ok: #4a8a5c;
   }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai", sans-serif;
-    background: var(--bg);
-    color: var(--brand);
-    padding-bottom: 40px;
-    min-height: 100vh;
+    background: var(--bg); color: var(--brand); padding-bottom: 40px; min-height: 100vh;
   }
 
-  /* ---------- หน้า Login ---------- */
+  /* ---------- Login ---------- */
   #loginScreen {
-    min-height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    background:
-      radial-gradient(circle at 15% 20%, rgba(201,138,75,0.25), transparent 45%),
-      radial-gradient(circle at 85% 80%, rgba(127,174,111,0.25), transparent 45%),
-      linear-gradient(160deg, #4a3728, #2f231a 70%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 15% 20%, rgba(201,138,75,0.25), transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(127,174,111,0.25), transparent 45%),
+                linear-gradient(160deg, #4a3728, #2f231a 70%);
     padding: 24px;
   }
   .login-card {
-    width: 100%; max-width: 360px;
-    background: rgba(255,255,255,0.97);
-    border-radius: 24px;
-    padding: 32px 26px 28px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+    width: 100%; max-width: 360px; background: rgba(255,255,255,0.97);
+    border-radius: 24px; padding: 32px 26px 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    text-align: center; position: relative; overflow: hidden;
   }
-  .login-card::before {
-    content: "";
-    position: absolute; top: -60px; right: -60px;
-    width: 160px; height: 160px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(201,138,75,0.18), transparent 70%);
-  }
-  .login-logo {
-    width: 78px; height: 78px; border-radius: 50%;
-    object-fit: cover; margin: 0 auto 14px;
-    border: 3px solid #fff;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-  }
-  .login-title { font-size: 19px; font-weight: 800; color: var(--brand); }
-  .login-sub { font-size: 12.5px; color: var(--brand-light); margin-top: 4px; margin-bottom: 22px; }
-
+  .login-logo { width: 78px; height: 78px; border-radius: 50%; object-fit: cover; margin: 0 auto 14px; border: 3px solid #fff; box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+  .login-title { font-size: 19px; font-weight: 800; }
+  .login-sub { font-size: 12.5px; color: var(--brand-light); margin: 4px 0 22px; }
   .field-wrap { position: relative; margin-bottom: 12px; text-align: left; }
-  .field-wrap .icon {
-    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-    font-size: 15px; opacity: .55;
-  }
-  .field-wrap input {
-    width: 100%; padding: 13px 14px 13px 40px;
-    border: 1.5px solid var(--line); border-radius: 12px;
-    font-size: 14.5px; background: #fbf8f4;
-    outline: none; transition: border-color .15s;
-  }
+  .field-wrap .icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; opacity: .55; }
+  .field-wrap input { width: 100%; padding: 13px 14px 13px 40px; border: 1.5px solid var(--line); border-radius: 12px; font-size: 14.5px; background: #fbf8f4; outline: none; }
   .field-wrap input:focus { border-color: var(--accent); background: #fff; }
+  #loginBtn { width: 100%; padding: 14px; margin-top: 8px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: #fff; border: none; border-radius: 12px; font-weight: 800; font-size: 15px; box-shadow: 0 8px 18px rgba(168,111,54,0.35); }
+  #loginError { color: var(--danger); font-size: 12.5px; margin-top: 12px; display: none; background: #fdeaea; padding: 8px; border-radius: 8px; }
 
-  #loginBtn {
-    width: 100%; padding: 14px; margin-top: 8px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    color: #fff; border: none; border-radius: 12px;
-    font-weight: 800; font-size: 15px; cursor: pointer;
-    box-shadow: 0 8px 18px rgba(168,111,54,0.35);
-  }
-  #loginBtn:active { transform: translateY(1px); }
-  #loginError {
-    color: var(--danger); font-size: 12.5px; margin-top: 12px;
-    display: none; background: #fdeaea; padding: 8px; border-radius: 8px;
-  }
-
-  /* ---------- Dashboard ---------- */
+  /* ---------- Dashboard shell ---------- */
   header {
-    background: linear-gradient(135deg, #6b4a35, #3f2e21);
-    color: #fff;
-    padding: 20px 20px 24px;
-    display: flex; align-items: center; gap: 12px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-    border-radius: 0 0 22px 22px;
+    background: linear-gradient(135deg, #6b4a35, #3f2e21); color: #fff;
+    padding: 18px 20px 20px; display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15); border-radius: 0 0 22px 22px;
   }
-  header img { width: 46px; height: 46px; border-radius: 50%; border: 2px solid rgba(255,255,255,.6); flex-shrink: 0; }
-  header .t { font-size: 17px; font-weight: 800; }
-  header .s { font-size: 12px; opacity: .85; }
-  #logoutBtn {
-    margin-left: auto; background: rgba(255,255,255,0.15); border: none;
-    color: #fff; padding: 8px 14px; border-radius: 18px; font-size: 12.5px; cursor: pointer;
-  }
+  header img { width: 44px; height: 44px; border-radius: 50%; border: 2px solid rgba(255,255,255,.6); flex-shrink: 0; }
+  header .t { font-size: 16.5px; font-weight: 800; }
+  header .s { font-size: 11.5px; opacity: .85; }
+  #logoutBtn { margin-left: auto; background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 7px 12px; border-radius: 18px; font-size: 12px; }
 
-  main { padding: 16px; max-width: 720px; margin: 0 auto; }
-
-  /* ---------- ป้ายเมนูหลัก ---------- */
-  .main-nav {
-    display: flex; gap: 8px; margin-bottom: 18px;
-    background: #fff; border: 1px solid var(--line); border-radius: 16px;
-    padding: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  /* Tab nav */
+  .tabnav { display: flex; gap: 6px; padding: 12px 12px 0; overflow-x: auto; }
+  .tab-btn {
+    flex-shrink: 0; padding: 9px 14px; border-radius: 20px 20px 0 0; border: none;
+    background: #efe6d9; color: var(--brand-light); font-size: 13px; font-weight: 700; cursor: pointer;
   }
-  .main-nav button {
-    flex: 1; border: none; background: transparent; cursor: pointer;
-    padding: 10px 6px; border-radius: 12px; font-size: 13px; font-weight: 700;
-    color: var(--brand-light); display: flex; flex-direction: column; align-items: center; gap: 2px;
-  }
-  .main-nav button .ic { font-size: 17px; }
-  .main-nav button.active { background: var(--brand); color: #fff; }
+  .tab-btn.active { background: var(--card); color: var(--accent-dark); }
 
-  .section { display: none; }
-  .section.active { display: block; }
-
-  .stats-row { display: flex; gap: 10px; margin-bottom: 16px; }
-  .stat-card {
-    flex: 1; background: var(--card); border-radius: 14px; padding: 12px 10px;
-    text-align: center; border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .stat-card .num { font-size: 20px; font-weight: 800; }
-  .stat-card .lbl { font-size: 11px; color: var(--brand-light); margin-top: 2px; }
-  .stat-card.c-รอชง .num { color: #a5690b; }
-  .stat-card.c-กำลังชง .num { color: #1c5fa8; }
-  .stat-card.c-พร้อมรับ .num { color: var(--ok); }
-
-  .subtabs { display: flex; gap: 8px; margin-bottom: 14px; }
-  .subtab-btn {
-    flex: 1; padding: 10px; border-radius: 12px; border: 1.5px solid var(--line);
-    background: #fff; font-size: 13.5px; font-weight: 700; cursor: pointer; color: var(--brand-light);
-  }
-  .subtab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-  .toolbar { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
-  .filter-chip {
-    flex-shrink: 0; padding: 8px 14px; border-radius: 20px; border: 1.5px solid var(--line);
-    background: #fff; font-size: 13px; cursor: pointer; white-space: nowrap;
-  }
-  .filter-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
-
-  #refreshBtn {
-    margin-left: auto; flex-shrink: 0;
-    background: var(--brand); color: #fff; border: none; border-radius: 20px;
-    padding: 8px 14px; font-size: 13px; cursor: pointer;
-  }
+  main { padding: 14px 14px 30px; max-width: 760px; margin: 0 auto; }
+  .tab-page { display: none; }
+  .tab-page.active { display: block; }
 
   #status { padding: 10px 14px; border-radius: 10px; font-size: 13.5px; margin-bottom: 12px; }
   #status.loading { background: #f1ece3; color: #6b5a48; }
   #status.error { background: #fdeaea; color: var(--danger); }
 
+  /* Stat cards */
+  .stats-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .stat-card { flex: 1; min-width: 90px; background: var(--card); border-radius: 14px; padding: 12px 10px; text-align: center; border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .stat-card .num { font-size: 19px; font-weight: 800; }
+  .stat-card .lbl { font-size: 10.5px; color: var(--brand-light); margin-top: 2px; }
+  .stat-card.c-รอชง .num { color: #a5690b; }
+  .stat-card.c-กำลังชง .num { color: #1c5fa8; }
+  .stat-card.c-พร้อมรับ .num { color: var(--ok); }
+
+  .section-date {
+    font-size: 13px; font-weight: 800; color: var(--brand-light);
+    margin: 18px 0 8px; padding-bottom: 4px; border-bottom: 1.5px solid var(--line);
+  }
+  .section-date:first-child { margin-top: 0; }
+
   .order-card {
     background: var(--card); border: 1px solid var(--line); border-radius: 16px;
-    padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    border-left: 4px solid var(--accent);
+    padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-left: 4px solid var(--accent);
   }
-  .order-card.done { border-left-color: var(--ok); opacity: .92; }
+  .order-card.done { border-left-color: var(--ok); opacity: .9; }
   .order-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-  .order-id { font-weight: 800; font-size: 14.5px; }
+  .order-id { font-weight: 800; font-size: 14px; }
   .order-time { font-size: 11.5px; color: var(--brand-light); margin-top: 2px; }
   .order-price { font-weight: 800; font-size: 16px; color: var(--accent-dark); white-space: nowrap; }
 
   .badge-row { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
-  .badge { font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
   .badge.status-รอชง { background: #fff0da; color: #a5690b; }
   .badge.status-กำลังชง { background: #e2f0ff; color: #1c5fa8; }
   .badge.status-พร้อมรับ { background: #e3f6e6; color: var(--ok); }
-  .badge.status-เสร็จสิ้น { background: #e3f6e6; color: var(--ok); }
+  .badge.status-เสร็จสิ้น { background: #e5e5e5; color: #555; }
   .badge.pay-รอตรวจสอบสลิป { background: #fdeaea; color: var(--danger); }
   .badge.pay-รอชำระที่ร้าน { background: #fff0da; color: #a5690b; }
   .badge.pay-ชำระแล้ว { background: #e3f6e6; color: var(--ok); }
 
-  .order-items { font-size: 13px; color: var(--brand-light); margin: 6px 0; line-height: 1.6; }
-  .order-cust { font-size: 12.5px; color: var(--brand-light); margin-bottom: 6px; }
+  .order-items { font-size: 12.5px; color: var(--brand-light); margin: 6px 0; line-height: 1.6; }
+  .order-cust { font-size: 12px; color: var(--brand-light); margin-bottom: 6px; }
 
   .order-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
   .order-actions select, .order-actions .slip-link, .order-actions .done-btn {
-    flex: 1; min-width: 120px;
-    padding: 9px 10px; border-radius: 10px; border: 1.5px solid var(--line);
-    font-size: 13px; background: #fff; text-align: center; text-decoration: none; color: var(--brand);
-    cursor: pointer;
+    flex: 1; min-width: 110px; padding: 9px 10px; border-radius: 10px; border: 1.5px solid var(--line);
+    font-size: 12.5px; background: #fff; text-align: center; text-decoration: none; color: var(--brand); cursor: pointer;
   }
   .order-actions .slip-link { background: #fdf3e8; border-color: var(--accent); color: var(--accent-dark); font-weight: 700; }
   .order-actions .done-btn { background: var(--ok); border-color: var(--ok); color: #fff; font-weight: 800; }
 
-  .date-group-label {
-    font-size: 13px; font-weight: 800; color: var(--brand-light);
-    margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 1.5px dashed var(--line);
-  }
-  .date-group-label:first-child { margin-top: 0; }
-
   .empty-state { text-align: center; color: #999; padding: 40px 0; font-size: 14px; }
 
-  /* ---------- รายได้ ---------- */
-  .big-total {
-    background: var(--card); border: 1px solid var(--line); border-radius: 18px;
-    padding: 20px; text-align: center; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .big-total .amount { font-size: 30px; font-weight: 800; color: var(--accent-dark); }
-  .big-total .lbl { font-size: 12.5px; color: var(--brand-light); margin-top: 4px; }
-  .chart-card {
-    background: var(--card); border: 1px solid var(--line); border-radius: 18px;
-    padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .chart-card .chart-title { font-size: 13.5px; font-weight: 800; margin-bottom: 10px; color: var(--brand); }
-  .chart-card canvas { max-height: 260px; }
+  /* Revenue tab */
+  .period-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .period-chip { flex: 1; padding: 10px; text-align: center; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .period-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .revenue-total { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: #fff; border-radius: 16px; padding: 18px; text-align: center; margin-bottom: 16px; }
+  .revenue-total .amt { font-size: 30px; font-weight: 800; }
+  .revenue-total .lbl { font-size: 12.5px; opacity: .9; margin-top: 2px; }
+  .chart-wrap { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 16px; }
 
-  /* ---------- ต้นทุน ---------- */
-  .summary-row { display: flex; gap: 10px; margin-bottom: 16px; }
-  .summary-card {
-    flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
-    padding: 12px 10px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  /* Expense tab */
+  .form-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+  .form-card h4 { font-size: 14px; margin-bottom: 10px; }
+  label.f-label { display: block; font-size: 12.5px; color: var(--brand-light); margin: 8px 0 4px; font-weight: 600; }
+  .form-card input {
+    width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; font-size: 14px; font-family: inherit;
   }
-  .summary-card .num { font-size: 17px; font-weight: 800; }
-  .summary-card .lbl { font-size: 10.5px; color: var(--brand-light); margin-top: 2px; }
-  .summary-card.profit .num { color: var(--ok); }
-  .summary-card.loss .num { color: var(--danger); }
+  #addExpenseBtn { width: 100%; margin-top: 12px; padding: 12px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-weight: 800; font-size: 14px; }
 
-  .expense-form {
-    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
-    padding: 14px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .expense-form .row { display: flex; gap: 8px; margin-bottom: 8px; }
-  .expense-form input, .expense-form textarea {
-    width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px;
-    font-size: 13.5px; background: #fbf8f4; outline: none; font-family: inherit;
-  }
-  .expense-form input:focus, .expense-form textarea:focus { border-color: var(--accent); background: #fff; }
-  .expense-form label { font-size: 11.5px; color: var(--brand-light); font-weight: 700; display: block; margin-bottom: 4px; }
-  .expense-form .field { flex: 1; }
-  #addExpenseBtn {
-    width: 100%; padding: 12px; border: none; border-radius: 10px; margin-top: 4px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    color: #fff; font-weight: 800; font-size: 14px; cursor: pointer;
-  }
+  .profit-summary { display: flex; gap: 10px; margin-bottom: 16px; }
+  .profit-card { flex: 1; background: var(--card); border-radius: 14px; padding: 12px; text-align: center; border: 1px solid var(--line); }
+  .profit-card .num { font-size: 16.5px; font-weight: 800; }
+  .profit-card .lbl { font-size: 10.5px; color: var(--brand-light); margin-top: 2px; }
+  .profit-card.income .num { color: var(--ok); }
+  .profit-card.expense .num { color: var(--danger); }
+  .profit-card.net.pos .num { color: var(--ok); }
+  .profit-card.net.neg .num { color: var(--danger); }
 
-  .expense-item {
-    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
-    padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .expense-item .info { flex: 1; }
-  .expense-item .desc { font-size: 13.5px; font-weight: 700; }
-  .expense-item .date { font-size: 11.5px; color: var(--brand-light); margin-top: 2px; }
-  .expense-item .amt { font-weight: 800; color: var(--danger); font-size: 14.5px; white-space: nowrap; }
-  .expense-item .del-btn {
-    border: none; background: #fdeaea; color: var(--danger); width: 28px; height: 28px;
-    border-radius: 50%; font-size: 14px; cursor: pointer; flex-shrink: 0;
-  }
-
-  .month-nav {
-    display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 14px;
-  }
-  .month-nav button {
-    border: 1.5px solid var(--line); background: #fff; width: 32px; height: 32px;
-    border-radius: 50%; cursor: pointer; font-size: 14px; color: var(--brand);
-  }
-  .month-nav .month-lbl { font-size: 14.5px; font-weight: 800; min-width: 130px; text-align: center; }
+  .expense-line { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
+  .expense-line .d { color: var(--brand-light); font-size: 11.5px; }
+  .expense-line .amt { font-weight: 700; color: var(--danger); }
 </style>
 </head>
 <body>
@@ -275,16 +155,8 @@
     <img src="logo.png" class="login-logo" alt="โลโก้ร้าน">
     <div class="login-title">ระบบจัดการร้าน</div>
     <div class="login-sub">ร้านน้ำชงน้องน้ำ 🧋</div>
-
-    <div class="field-wrap">
-      <span class="icon">👤</span>
-      <input type="text" id="userInput" placeholder="ชื่อผู้ใช้">
-    </div>
-    <div class="field-wrap">
-      <span class="icon">🔒</span>
-      <input type="password" id="pwInput" placeholder="รหัสผ่าน">
-    </div>
-
+    <div class="field-wrap"><span class="icon">👤</span><input type="text" id="userInput" placeholder="ชื่อผู้ใช้"></div>
+    <div class="field-wrap"><span class="icon">🔒</span><input type="password" id="pwInput" placeholder="รหัสผ่าน"></div>
     <button id="loginBtn" onclick="tryLogin()">เข้าสู่ระบบ</button>
     <div id="loginError">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
   </div>
@@ -293,135 +165,89 @@
 <div id="dashboardScreen" style="display:none;">
   <header>
     <img src="logo.png" alt="โลโก้">
-    <div>
-      <div class="t">ร้านน้ำชงน้องน้ำ</div>
-      <div class="s" id="headerSub">หน้าจัดการคำสั่งซื้อ</div>
-    </div>
+    <div><div class="t">ร้านน้ำชงน้องน้ำ</div><div class="s">หน้าจัดการร้าน</div></div>
     <button id="logoutBtn" onclick="logout()">ออกจากระบบ</button>
   </header>
 
+  <div class="tabnav">
+    <button class="tab-btn active" data-tab="today" onclick="switchTab('today')">📋 วันนี้</button>
+    <button class="tab-btn" data-tab="history" onclick="switchTab('history')">✅ ออเดอร์สำเร็จ</button>
+    <button class="tab-btn" data-tab="revenue" onclick="switchTab('revenue')">💰 รายได้</button>
+    <button class="tab-btn" data-tab="cost" onclick="switchTab('cost')">📉 ต้นทุน/กำไร</button>
+  </div>
+
   <main>
-    <div class="main-nav">
-      <button class="nav-btn active" data-sec="orders" onclick="setSection('orders')">
-        <span class="ic">📋</span> คำสั่งซื้อ
-      </button>
-      <button class="nav-btn" data-sec="revenue" onclick="setSection('revenue')">
-        <span class="ic">💰</span> รายได้
-      </button>
-      <button class="nav-btn" data-sec="costs" onclick="setSection('costs')">
-        <span class="ic">📦</span> ต้นทุน
-      </button>
-    </div>
+    <div id="status" style="display:none;"></div>
 
-    <!-- ================= หน้าคำสั่งซื้อ ================= -->
-    <section id="section-orders" class="section active">
-      <div class="subtabs">
-        <button class="subtab-btn active" data-t="today" onclick="setOrdersTab('today')">🗓️ วันนี้</button>
-        <button class="subtab-btn" data-t="completed" onclick="setOrdersTab('completed')">✅ ออเดอร์สำเร็จ</button>
-      </div>
-
-      <div id="todayDateLine" style="font-size:12.5px; color:var(--brand-light); margin-bottom:12px;"></div>
-
+    <!-- TAB: วันนี้ -->
+    <div class="tab-page active" id="tab-today">
+      <div id="todayDateLabel" class="section-date" style="border:none; margin-top:0;"></div>
       <div class="stats-row">
         <div class="stat-card c-รอชง"><div class="num" id="statRoChong">0</div><div class="lbl">รอชง</div></div>
         <div class="stat-card c-กำลังชง"><div class="num" id="statGamlangChong">0</div><div class="lbl">กำลังชง</div></div>
         <div class="stat-card c-พร้อมรับ"><div class="num" id="statProm">0</div><div class="lbl">พร้อมรับ</div></div>
       </div>
+      <div id="todayOrderList"></div>
+    </div>
 
-      <div class="toolbar" id="orderToolbar">
-        <div class="filter-chip active" data-f="all" onclick="setFilter('all')">ทั้งหมด</div>
-        <div class="filter-chip" data-f="รอชง" onclick="setFilter('รอชง')">รอชง</div>
-        <div class="filter-chip" data-f="กำลังชง" onclick="setFilter('กำลังชง')">กำลังชง</div>
-        <div class="filter-chip" data-f="พร้อมรับ" onclick="setFilter('พร้อมรับ')">พร้อมรับ</div>
-        <button id="refreshBtn" onclick="loadOrders()">🔄 รีเฟรช</button>
+    <!-- TAB: ประวัติ -->
+    <div class="tab-page" id="tab-history">
+      <div id="historyList"></div>
+    </div>
+
+    <!-- TAB: รายได้ -->
+    <div class="tab-page" id="tab-revenue">
+      <div class="period-row">
+        <div class="period-chip active" data-p="today" onclick="setRevenuePeriod('today')">วันนี้</div>
+        <div class="period-chip" data-p="week" onclick="setRevenuePeriod('week')">สัปดาห์นี้</div>
+        <div class="period-chip" data-p="month" onclick="setRevenuePeriod('month')">เดือนนี้</div>
+      </div>
+      <div class="revenue-total">
+        <div class="amt"><span id="revenueAmt">0</span> บาท</div>
+        <div class="lbl" id="revenueLbl">รายได้วันนี้</div>
+      </div>
+      <div class="chart-wrap"><canvas id="revenueChart" height="180"></canvas></div>
+    </div>
+
+    <!-- TAB: ต้นทุน/กำไร -->
+    <div class="tab-page" id="tab-cost">
+      <div class="form-card">
+        <h4>➕ บันทึกรายจ่าย (ซื้อของเข้าร้าน)</h4>
+        <label class="f-label">วันที่</label>
+        <input type="date" id="expDate">
+        <label class="f-label">จำนวนเงิน (บาท)</label>
+        <input type="number" id="expAmount" placeholder="0">
+        <label class="f-label">รายการ / หมายเหตุ</label>
+        <input type="text" id="expNote" placeholder="เช่น ซื้อนม, ไข่มุก, แก้ว">
+        <button id="addExpenseBtn" onclick="addExpense()">บันทึกรายจ่าย</button>
       </div>
 
-      <div id="status" style="display:none;"></div>
-      <div id="orderList"></div>
-    </section>
-
-    <!-- ================= หน้ารายได้ ================= -->
-    <section id="section-revenue" class="section">
-      <div class="toolbar">
-        <div class="filter-chip active" data-r="today" onclick="setRevenueRange('today')">วันนี้</div>
-        <div class="filter-chip" data-r="week" onclick="setRevenueRange('week')">สัปดาห์นี้</div>
-        <div class="filter-chip" data-r="month" onclick="setRevenueRange('month')">เดือนนี้</div>
-        <button id="revenueRefreshBtn" onclick="loadRevenue()">🔄 รีเฟรช</button>
+      <div class="profit-summary">
+        <div class="profit-card income"><div class="num" id="pIncome">0</div><div class="lbl">รายรับเดือนนี้</div></div>
+        <div class="profit-card expense"><div class="num" id="pExpense">0</div><div class="lbl">รายจ่ายเดือนนี้</div></div>
+        <div class="profit-card net pos" id="pNetCard"><div class="num" id="pNet">0</div><div class="lbl">กำไร/ขาดทุน</div></div>
       </div>
 
-      <div id="revenueStatus" style="display:none;"></div>
+      <div class="chart-wrap"><canvas id="profitChart" height="200"></canvas></div>
 
-      <div class="big-total">
-        <div class="amount" id="revenueTotal">0 บาท</div>
-        <div class="lbl" id="revenueTotalLbl">รายได้วันนี้</div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-title" id="revenueChartTitle">รายได้แยกตามช่วงเวลา</div>
-        <canvas id="revenueChart"></canvas>
-      </div>
-    </section>
-
-    <!-- ================= หน้าต้นทุน ================= -->
-    <section id="section-costs" class="section">
-      <div class="month-nav">
-        <button onclick="shiftMonth(-1)">‹</button>
-        <div class="month-lbl" id="costMonthLbl">-</div>
-        <button onclick="shiftMonth(1)">›</button>
-      </div>
-
-      <div id="costStatus" style="display:none;"></div>
-
-      <div class="summary-row">
-        <div class="summary-card"><div class="num" id="sumRevenue">0</div><div class="lbl">รายได้เดือนนี้</div></div>
-        <div class="summary-card"><div class="num" id="sumCost">0</div><div class="lbl">ต้นทุนเดือนนี้</div></div>
-        <div class="summary-card profit" id="sumProfitCard"><div class="num" id="sumProfit">0</div><div class="lbl">กำไร/ขาดทุน</div></div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-title">กำไร-ขาดทุนรายเดือน</div>
-        <canvas id="profitChart"></canvas>
-      </div>
-
-      <div class="expense-form">
-        <div class="row">
-          <div class="field">
-            <label>วันที่ซื้อของ</label>
-            <input type="date" id="expDate">
-          </div>
-          <div class="field">
-            <label>ยอดเงิน (บาท)</label>
-            <input type="number" id="expAmount" placeholder="0" min="0" step="0.01">
-          </div>
-        </div>
-        <div class="field">
-          <label>รายการ / รายละเอียด</label>
-          <input type="text" id="expDesc" placeholder="เช่น ซื้อนมสด, แก้วพลาสติก, ไซรัป">
-        </div>
-        <button id="addExpenseBtn" onclick="addExpense()">➕ บันทึกรายจ่าย</button>
-      </div>
-
+      <h4 style="font-size:14px; margin:16px 0 8px;">รายการรายจ่ายล่าสุด</h4>
       <div id="expenseList"></div>
-    </section>
+    </div>
   </main>
 </div>
 
 <script>
   const API_URL = 'https://script.google.com/macros/s/AKfycbyXd7Vht8MRECpCWk1XyyVmoB4JSxJFYZBiGuQS027Xq5QHoeyy4LxSIT1rl50u1_sO/exec';
-
-  // เปลี่ยนชื่อผู้ใช้/รหัสผ่านตรงนี้ได้ตามต้องการ
   const ADMIN_USERNAME = 'nongnam';
   const ADMIN_PASSWORD = 'nongnam2569';
 
   let allOrders = [];
-  let currentFilter = 'all';
-  let ordersTab = 'today';
-  let revenueRange = 'today';
-  let revenueChartObj = null;
-  let profitChartObj = null;
-  let costMonthDate = new Date(); // เดือนที่กำลังดูอยู่ในหน้าต้นทุน
+  let allExpenses = [];
+  let revenueChart = null;
+  let profitChart = null;
+  let revenuePeriod = 'today';
 
-  /* ---------- Login ---------- */
+  // ---------- Login ----------
   function tryLogin() {
     const user = document.getElementById('userInput').value.trim();
     const pw = document.getElementById('pwInput').value;
@@ -433,398 +259,333 @@
       document.getElementById('loginError').style.display = 'block';
     }
   }
-
   ['userInput', 'pwInput'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => {
-      if (e.key === 'Enter') tryLogin();
-    });
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
   });
-
   function logout() {
     sessionStorage.removeItem('nn_admin_ok');
     document.getElementById('dashboardScreen').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('pwInput').value = '';
   }
-
   function showDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashboardScreen').style.display = 'block';
     document.getElementById('expDate').valueAsDate = new Date();
-    updateTodayDateLine();
-    loadOrders();
+    loadAll();
+  }
+  if (sessionStorage.getItem('nn_admin_ok') === '1') showDashboard();
+
+  // ---------- Tabs ----------
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    if (tab === 'revenue') renderRevenueTab();
+    if (tab === 'cost') renderCostTab();
   }
 
-  if (sessionStorage.getItem('nn_admin_ok') === '1') {
-    showDashboard();
-  }
-
-  /* ---------- นำทางเมนูหลัก ---------- */
-  function setSection(sec) {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.sec === sec));
-    document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === 'section-' + sec));
-    const subs = { orders: 'หน้าจัดการคำสั่งซื้อ', revenue: 'สรุปรายได้', costs: 'บันทึกต้นทุน & กำไรขาดทุน' };
-    document.getElementById('headerSub').textContent = subs[sec];
-    if (sec === 'revenue') loadRevenue();
-    if (sec === 'costs') loadCosts();
-  }
-
-  function updateTodayDateLine() {
-    const d = new Date();
-    document.getElementById('todayDateLine').textContent =
-      '📅 ' + d.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
-  }
-
-  /* ================= หน้าคำสั่งซื้อ ================= */
   function setStatus(text, type) {
     const el = document.getElementById('status');
-    el.textContent = text;
-    el.className = type || '';
+    el.textContent = text; el.className = type || '';
     el.style.display = text ? 'block' : 'none';
   }
 
-  async function loadOrders() {
+  // ---------- Load data ----------
+  async function loadAll() {
     try {
-      setStatus('กำลังโหลดรายการสั่งซื้อ...', 'loading');
-      const res = await fetch(API_URL + '?action=getAllOrders', { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP Error ' + res.status);
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'โหลดข้อมูลไม่สำเร็จ');
+      setStatus('กำลังโหลดข้อมูล...', 'loading');
+      const [ordersRes, expensesRes] = await Promise.all([
+        fetch(API_URL + '?action=getAllOrders', { cache: 'no-store' }),
+        fetch(API_URL + '?action=getExpenses', { cache: 'no-store' })
+      ]);
+      const ordersJson = await ordersRes.json();
+      const expensesJson = await expensesRes.json();
+      if (!ordersJson.ok) throw new Error(ordersJson.error || 'โหลดออเดอร์ไม่สำเร็จ');
+      if (!expensesJson.ok) throw new Error(expensesJson.error || 'โหลดรายจ่ายไม่สำเร็จ');
 
-      allOrders = json.data || [];
+      allOrders = ordersJson.data || [];
+      allExpenses = expensesJson.data || [];
       setStatus('', '');
-      renderStats();
-      renderOrders();
+      renderTodayTab();
+      renderHistoryTab();
     } catch (err) {
       setStatus('โหลดข้อมูลไม่สำเร็จ: ' + (err.message || err), 'error');
     }
   }
 
-  function isSameDay(a, b) {
-    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  function isSameDay(d1, d2) {
+    return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+  }
+  function fmtDateThai(d) {
+    return d.toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  function fmtDateShort(d) {
+    return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
   }
 
-  function todayOrders() {
-    const now = new Date();
-    return allOrders.filter(o => o.timestamp && isSameDay(new Date(o.timestamp), now) && o.orderStatus !== 'เสร็จสิ้น');
-  }
-
-  function completedOrders() {
-    return allOrders.filter(o => o.orderStatus === 'เสร็จสิ้น')
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  }
-
-  function setOrdersTab(tab) {
-    ordersTab = tab;
-    document.querySelectorAll('#section-orders .subtab-btn').forEach(b => b.classList.toggle('active', b.dataset.t === tab));
-    document.getElementById('orderToolbar').style.display = tab === 'today' ? 'flex' : 'none';
-    document.querySelector('#section-orders .stats-row').style.display = tab === 'today' ? 'flex' : 'none';
-    document.getElementById('todayDateLine').style.display = tab === 'today' ? 'block' : 'none';
-    renderOrders();
-  }
-
-  function renderStats() {
-    const t = todayOrders();
-    document.getElementById('statRoChong').textContent = t.filter(o => o.orderStatus === 'รอชง').length;
-    document.getElementById('statGamlangChong').textContent = t.filter(o => o.orderStatus === 'กำลังชง').length;
-    document.getElementById('statProm').textContent = t.filter(o => o.orderStatus === 'พร้อมรับ').length;
-  }
-
-  function setFilter(f) {
-    currentFilter = f;
-    document.querySelectorAll('#orderToolbar .filter-chip').forEach(c => {
-      c.classList.toggle('active', c.dataset.f === f);
-    });
-    renderOrders();
-  }
-
-  function orderCardHtml(o, opts) {
-    opts = opts || {};
-    const itemsText = (o.items || []).map(i => {
+  function itemsToText(items) {
+    return (items || []).map(i => {
       const detail = [];
       if (i.sweetness) detail.push(i.sweetness);
       if (i.toppings) detail.push(i.toppings);
-      const detailText = detail.length ? ` (${detail.join(', ')})` : '';
-      return `${i.name} × ${i.qty}${detailText}`;
+      const dt = detail.length ? ` (${detail.join(', ')})` : '';
+      return `${i.name} × ${i.qty}${dt}`;
     }).join(' · ');
+  }
 
+  function orderCardHtml(o, showDoneBtn) {
     const custText = [o.customerName, o.telephone].filter(Boolean).join(' · ');
-    const timeText = o.timestamp ? new Date(o.timestamp).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '';
-
-    const actionsHtml = opts.completed ? '' : `
-      <div class="order-actions">
-        <select onchange="updateStatus('${o.orderId}', this.value)">
-          <option value="">-- เปลี่ยนสถานะออเดอร์ --</option>
-          <option value="รอชง" ${o.orderStatus === 'รอชง' ? 'selected' : ''}>รอชง</option>
-          <option value="กำลังชง" ${o.orderStatus === 'กำลังชง' ? 'selected' : ''}>กำลังชง</option>
-          <option value="พร้อมรับ" ${o.orderStatus === 'พร้อมรับ' ? 'selected' : ''}>พร้อมรับ</option>
-        </select>
-        ${o.slipUrl ? `<a class="slip-link" href="${o.slipUrl}" target="_blank">🧾 ดูสลิป</a>` : ''}
-        ${o.orderStatus === 'พร้อมรับ' ? `<button class="done-btn" onclick="markDone('${o.orderId}')">✅ ลูกค้ารับแล้ว</button>` : ''}
-      </div>`;
+    const timeText = o.timestamp ? new Date(o.timestamp).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
+    const isDone = o.orderStatus === 'เสร็จสิ้น';
 
     return `
-      <div class="order-card ${opts.completed ? 'done' : ''}">
+      <div class="order-card ${isDone ? 'done' : ''}">
         <div class="order-top">
-          <div>
-            <div class="order-id">${o.orderId}</div>
-            <div class="order-time">${timeText}</div>
-          </div>
+          <div><div class="order-id">${o.orderId}</div><div class="order-time">${timeText} น.</div></div>
           <div class="order-price">${o.totalPrice} บาท</div>
         </div>
-
         ${custText ? `<div class="order-cust">👤 ${custText}</div>` : ''}
-
         <div class="badge-row">
           <span class="badge status-${o.orderStatus}">${o.orderStatus || '-'}</span>
           <span class="badge pay-${o.paymentStatus}">${o.paymentStatus || '-'}</span>
           <span class="badge" style="background:#eee; color:#555;">${o.paymentMethod || '-'}</span>
         </div>
-
-        <div class="order-items">${itemsText}</div>
-        ${actionsHtml}
-      </div>`;
+        <div class="order-items">${itemsToText(o.items)}</div>
+        <div class="order-actions">
+          ${!isDone ? `
+            <select onchange="updateStatus('${o.orderId}', this.value)">
+              <option value="">-- เปลี่ยนสถานะ --</option>
+              <option value="รอชง" ${o.orderStatus === 'รอชง' ? 'selected' : ''}>รอชง</option>
+              <option value="กำลังชง" ${o.orderStatus === 'กำลังชง' ? 'selected' : ''}>กำลังชง</option>
+              <option value="พร้อมรับ" ${o.orderStatus === 'พร้อมรับ' ? 'selected' : ''}>พร้อมรับ</option>
+            </select>
+          ` : ''}
+          ${o.slipUrl ? `<a class="slip-link" href="${o.slipUrl}" target="_blank">🧾 ดูสลิป</a>` : ''}
+          ${showDoneBtn && !isDone ? `<button class="done-btn" onclick="updateStatus('${o.orderId}', 'เสร็จสิ้น')">✓ เสร็จสิ้น</button>` : ''}
+        </div>
+      </div>
+    `;
   }
 
-  function renderOrders() {
-    const el = document.getElementById('orderList');
+  // ---------- TAB: วันนี้ ----------
+  function renderTodayTab() {
+    const today = new Date();
+    document.getElementById('todayDateLabel').textContent = fmtDateThai(today);
 
-    if (ordersTab === 'today') {
-      const list = currentFilter === 'all' ? todayOrders() : todayOrders().filter(o => o.orderStatus === currentFilter);
-      if (list.length === 0) {
-        el.innerHTML = '<div class="empty-state">ไม่มีรายการสั่งซื้อในหมวดนี้</div>';
-        return;
-      }
-      el.innerHTML = list.map(o => orderCardHtml(o)).join('');
-    } else {
-      const list = completedOrders();
-      if (list.length === 0) {
-        el.innerHTML = '<div class="empty-state">ยังไม่มีออเดอร์ที่เสร็จสิ้น</div>';
-        return;
-      }
-      // จัดกลุ่มตามวันที่
-      let html = '';
-      let lastDateKey = null;
-      list.forEach(o => {
-        const d = new Date(o.timestamp);
-        const dateKey = d.toDateString();
-        if (dateKey !== lastDateKey) {
-          html += `<div class="date-group-label">📅 ${d.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })}</div>`;
-          lastDateKey = dateKey;
-        }
-        html += orderCardHtml(o, { completed: true });
-      });
-      el.innerHTML = html;
+    const todays = allOrders.filter(o => o.timestamp && isSameDay(new Date(o.timestamp), today) && o.orderStatus !== 'เสร็จสิ้น');
+
+    document.getElementById('statRoChong').textContent = todays.filter(o => o.orderStatus === 'รอชง').length;
+    document.getElementById('statGamlangChong').textContent = todays.filter(o => o.orderStatus === 'กำลังชง').length;
+    document.getElementById('statProm').textContent = todays.filter(o => o.orderStatus === 'พร้อมรับ').length;
+
+    const el = document.getElementById('todayOrderList');
+    if (todays.length === 0) {
+      el.innerHTML = '<div class="empty-state">วันนี้ยังไม่มีออเดอร์ที่ต้องจัดการ</div>';
+      return;
     }
+    el.innerHTML = todays.map(o => orderCardHtml(o, true)).join('');
   }
 
   async function updateStatus(orderId, newStatus) {
     if (!newStatus) return;
-    await postAction({ action: 'updateOrderStatus', orderId, newStatus });
-  }
-
-  async function markDone(orderId) {
-    await postAction({ action: 'updateOrderStatus', orderId, newStatus: 'เสร็จสิ้น' });
-  }
-
-  async function postAction(body) {
     try {
-      const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(body) });
+      const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateOrderStatus', orderId, newStatus }) });
       const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'ดำเนินการไม่สำเร็จ');
-      await loadOrders();
-      return json;
+      if (!json.ok) throw new Error(json.error || 'อัปเดตไม่สำเร็จ');
+      await loadAll();
     } catch (err) {
       alert('เกิดข้อผิดพลาด: ' + (err.message || err));
     }
   }
 
-  /* ================= หน้ารายได้ ================= */
-  // คาดหวังรูปแบบข้อมูลจาก backend (Code.gs):
-  // GET ?action=getRevenue&range=today|week|month
-  // -> { ok: true, data: { total: 1234, labels: [...], values: [...] } }
-  function setRevenueStatus(text, type) {
-    const el = document.getElementById('revenueStatus');
-    el.textContent = text; el.className = type || ''; el.style.display = text ? 'block' : 'none';
-  }
-
-  function setRevenueRange(r) {
-    revenueRange = r;
-    document.querySelectorAll('#section-revenue .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.r === r));
-    loadRevenue();
-  }
-
-  async function loadRevenue() {
-    const labels = { today: 'วันนี้', week: 'สัปดาห์นี้', month: 'เดือนนี้' };
-    document.getElementById('revenueTotalLbl').textContent = 'รายได้' + labels[revenueRange];
-    document.getElementById('revenueChartTitle').textContent = 'รายได้แยกตาม' + (revenueRange === 'today' ? 'ชั่วโมง' : 'วัน');
-    try {
-      setRevenueStatus('กำลังโหลดข้อมูลรายได้...', 'loading');
-      const res = await fetch(API_URL + '?action=getRevenue&range=' + revenueRange, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP Error ' + res.status);
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'โหลดข้อมูลไม่สำเร็จ');
-      setRevenueStatus('', '');
-      const data = json.data || { total: 0, labels: [], values: [] };
-      document.getElementById('revenueTotal').textContent = (data.total || 0).toLocaleString('th-TH') + ' บาท';
-      drawRevenueChart(data.labels || [], data.values || []);
-    } catch (err) {
-      setRevenueStatus('โหลดข้อมูลไม่สำเร็จ: ' + (err.message || err), 'error');
+  // ---------- TAB: ประวัติ (ออเดอร์สำเร็จ แยกตามวัน) ----------
+  function renderHistoryTab() {
+    const done = allOrders.filter(o => o.orderStatus === 'เสร็จสิ้น' && o.timestamp);
+    const el = document.getElementById('historyList');
+    if (done.length === 0) {
+      el.innerHTML = '<div class="empty-state">ยังไม่มีออเดอร์ที่เสร็จสิ้น</div>';
+      return;
     }
+    // จัดกลุ่มตามวันที่
+    const groups = {};
+    done.forEach(o => {
+      const d = new Date(o.timestamp);
+      const key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+      if (!groups[key]) groups[key] = { date: d, orders: [] };
+      groups[key].orders.push(o);
+    });
+    const sortedKeys = Object.keys(groups).sort((a, b) => groups[b].date - groups[a].date);
+
+    el.innerHTML = sortedKeys.map(k => {
+      const g = groups[k];
+      const dayTotal = g.orders.reduce((s, o) => s + Number(o.totalPrice), 0);
+      return `
+        <div class="section-date">${fmtDateThai(g.date)} · รวม ${dayTotal} บาท (${g.orders.length} ออเดอร์)</div>
+        ${g.orders.map(o => orderCardHtml(o, false)).join('')}
+      `;
+    }).join('');
   }
 
-  function drawRevenueChart(labels, values) {
-    const ctx = document.getElementById('revenueChart');
-    if (revenueChartObj) revenueChartObj.destroy();
-    revenueChartObj = new Chart(ctx, {
+  // ---------- TAB: รายได้ ----------
+  function setRevenuePeriod(p) {
+    revenuePeriod = p;
+    document.querySelectorAll('.period-chip').forEach(c => c.classList.toggle('active', c.dataset.p === p));
+    renderRevenueTab();
+  }
+
+  function getOrdersInRange(start, end) {
+    return allOrders.filter(o => {
+      if (!o.timestamp) return false;
+      const t = new Date(o.timestamp);
+      return t >= start && t <= end && o.orderStatus === 'เสร็จสิ้น';
+    });
+  }
+
+  function renderRevenueTab() {
+    const now = new Date();
+    let start, end, labelText, groupBy;
+
+    if (revenuePeriod === 'today') {
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+      labelText = 'รายได้วันนี้'; groupBy = 'hour';
+    } else if (revenuePeriod === 'week') {
+      const dayOfWeek = now.getDay();
+      start = new Date(now); start.setDate(now.getDate() - dayOfWeek); start.setHours(0,0,0,0);
+      end = new Date(start); end.setDate(start.getDate() + 6); end.setHours(23,59,59,999);
+      labelText = 'รายได้สัปดาห์นี้'; groupBy = 'day';
+    } else {
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      labelText = 'รายได้เดือนนี้'; groupBy = 'day';
+    }
+
+    const orders = getOrdersInRange(start, end);
+    const total = orders.reduce((s, o) => s + Number(o.totalPrice), 0);
+    document.getElementById('revenueAmt').textContent = total.toLocaleString('th-TH');
+    document.getElementById('revenueLbl').textContent = labelText;
+
+    // จัดกลุ่มสำหรับกราฟ
+    let labels = [], values = [];
+    if (groupBy === 'hour') {
+      const buckets = new Array(24).fill(0);
+      orders.forEach(o => { buckets[new Date(o.timestamp).getHours()] += Number(o.totalPrice); });
+      labels = buckets.map((_, h) => h + ':00');
+      values = buckets;
+    } else {
+      const dayCount = Math.round((end - start) / 86400000) + 1;
+      const buckets = new Array(dayCount).fill(0);
+      orders.forEach(o => {
+        const diff = Math.floor((new Date(o.timestamp) - start) / 86400000);
+        if (diff >= 0 && diff < dayCount) buckets[diff] += Number(o.totalPrice);
+      });
+      labels = buckets.map((_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return fmtDateShort(d); });
+      values = buckets;
+    }
+
+    drawChart('revenueChart', 'revenue', labels, [{ label: 'รายได้ (บาท)', data: values, backgroundColor: '#c98a4b' }]);
+  }
+
+  let chartInstances = {};
+  function drawChart(canvasId, key, labels, datasets) {
+    if (chartInstances[key]) chartInstances[key].destroy();
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    chartInstances[key] = new Chart(ctx, {
       type: 'bar',
-      data: {
-        labels,
-        datasets: [{
-          label: 'รายได้ (บาท)',
-          data: values,
-          backgroundColor: '#c98a4b',
-          borderRadius: 6,
-        }]
-      },
+      data: { labels, datasets },
       options: {
         responsive: true,
-        plugins: { legend: { display: false } },
+        plugins: { legend: { display: datasets.length > 1 } },
         scales: { y: { beginAtZero: true } }
       }
     });
   }
 
-  /* ================= หน้าต้นทุน ================= */
-  // คาดหวังรูปแบบข้อมูลจาก backend (Code.gs):
-  // GET  ?action=getCostSummary&month=YYYY-MM
-  //   -> { ok:true, data:{ revenue, cost, profit, expenses:[{id,date,description,amount}],
-  //                          monthlyLabels:[...], monthlyProfit:[...] } }
-  // POST { action:'addExpense', date, description, amount } -> { ok:true, data:{id,...} }
-  // POST { action:'deleteExpense', id } -> { ok:true }
-  function setCostStatus(text, type) {
-    const el = document.getElementById('costStatus');
-    el.textContent = text; el.className = type || ''; el.style.display = text ? 'block' : 'none';
-  }
-
-  function monthKey(d) {
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-  }
-
-  function shiftMonth(delta) {
-    costMonthDate = new Date(costMonthDate.getFullYear(), costMonthDate.getMonth() + delta, 1);
-    loadCosts();
-  }
-
-  async function loadCosts() {
-    document.getElementById('costMonthLbl').textContent =
-      costMonthDate.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-    try {
-      setCostStatus('กำลังโหลดข้อมูลต้นทุน...', 'loading');
-      const res = await fetch(API_URL + '?action=getCostSummary&month=' + monthKey(costMonthDate), { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP Error ' + res.status);
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'โหลดข้อมูลไม่สำเร็จ');
-      setCostStatus('', '');
-      renderCostSummary(json.data || {});
-    } catch (err) {
-      setCostStatus('โหลดข้อมูลไม่สำเร็จ: ' + (err.message || err), 'error');
-    }
-  }
-
-  function renderCostSummary(data) {
-    const revenue = data.revenue || 0;
-    const cost = data.cost || 0;
-    const profit = data.profit != null ? data.profit : (revenue - cost);
-
-    document.getElementById('sumRevenue').textContent = revenue.toLocaleString('th-TH');
-    document.getElementById('sumCost').textContent = cost.toLocaleString('th-TH');
-    document.getElementById('sumProfit').textContent = profit.toLocaleString('th-TH');
-    const profitCard = document.getElementById('sumProfitCard');
-    profitCard.classList.toggle('profit', profit >= 0);
-    profitCard.classList.toggle('loss', profit < 0);
-
-    drawProfitChart(data.monthlyLabels || [], data.monthlyProfit || []);
-    renderExpenseList(data.expenses || []);
-  }
-
-  function drawProfitChart(labels, values) {
-    const ctx = document.getElementById('profitChart');
-    if (profitChartObj) profitChartObj.destroy();
-    profitChartObj = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'กำไร/ขาดทุน (บาท)',
-          data: values,
-          borderColor: '#7fae6f',
-          backgroundColor: 'rgba(127,174,111,0.15)',
-          fill: true,
-          tension: 0.3,
-          pointBackgroundColor: '#4a8a5c',
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: false } }
-      }
-    });
-  }
-
-  function renderExpenseList(expenses) {
-    const el = document.getElementById('expenseList');
-    if (!expenses.length) {
-      el.innerHTML = '<div class="empty-state">ยังไม่มีรายการต้นทุนเดือนนี้</div>';
-      return;
-    }
-    const sorted = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
-    el.innerHTML = sorted.map(e => `
-      <div class="expense-item">
-        <div class="info">
-          <div class="desc">${e.description || '-'}</div>
-          <div class="date">${new Date(e.date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
-        </div>
-        <div class="amt">-${Number(e.amount).toLocaleString('th-TH')} บาท</div>
-        <button class="del-btn" onclick="deleteExpense('${e.id}')">✕</button>
-      </div>
-    `).join('');
-  }
-
+  // ---------- TAB: ต้นทุน/กำไร ----------
   async function addExpense() {
     const date = document.getElementById('expDate').value;
-    const description = document.getElementById('expDesc').value.trim();
-    const amount = parseFloat(document.getElementById('expAmount').value);
+    const amount = Number(document.getElementById('expAmount').value);
+    const note = document.getElementById('expNote').value;
 
-    if (!date) return alert('กรุณาเลือกวันที่');
-    if (!description) return alert('กรุณาระบุรายการ');
-    if (!amount || amount <= 0) return alert('กรุณาระบุยอดเงินให้ถูกต้อง');
+    if (!amount || amount <= 0) { alert('กรุณาระบุจำนวนเงินให้ถูกต้อง'); return; }
 
     try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'addExpense', date, description, amount })
-      });
+      const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addExpense', date, amount, note }) });
       const json = await res.json();
       if (!json.ok) throw new Error(json.error || 'บันทึกไม่สำเร็จ');
-      document.getElementById('expDesc').value = '';
+
       document.getElementById('expAmount').value = '';
-      await loadCosts();
+      document.getElementById('expNote').value = '';
+
+      const expRes = await fetch(API_URL + '?action=getExpenses', { cache: 'no-store' });
+      const expJson = await expRes.json();
+      allExpenses = expJson.data || [];
+
+      renderCostTab();
+      alert('บันทึกรายจ่ายเรียบร้อยแล้ว ✓');
     } catch (err) {
       alert('เกิดข้อผิดพลาด: ' + (err.message || err));
     }
   }
 
-  async function deleteExpense(id) {
-    if (!confirm('ลบรายการนี้ใช่ไหม?')) return;
-    try {
-      const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteExpense', id }) });
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'ลบไม่สำเร็จ');
-      await loadCosts();
-    } catch (err) {
-      alert('เกิดข้อผิดพลาด: ' + (err.message || err));
+  function renderCostTab() {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+    const monthIncome = getOrdersInRange(monthStart, monthEnd).reduce((s, o) => s + Number(o.totalPrice), 0);
+    const monthExpense = allExpenses
+      .filter(e => e.date && new Date(e.date) >= monthStart && new Date(e.date) <= monthEnd)
+      .reduce((s, e) => s + Number(e.amount), 0);
+    const net = monthIncome - monthExpense;
+
+    document.getElementById('pIncome').textContent = monthIncome.toLocaleString('th-TH');
+    document.getElementById('pExpense').textContent = monthExpense.toLocaleString('th-TH');
+    document.getElementById('pNet').textContent = net.toLocaleString('th-TH');
+    const netCard = document.getElementById('pNetCard');
+    netCard.classList.toggle('pos', net >= 0);
+    netCard.classList.toggle('neg', net < 0);
+    document.querySelector('#pNetCard .lbl').textContent = net >= 0 ? 'กำไรเดือนนี้' : 'ขาดทุนเดือนนี้';
+
+    // กราฟย้อนหลัง 6 เดือน: รายรับ vs รายจ่าย
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push(d);
+    }
+    const incomeData = months.map(m => {
+      const s = new Date(m.getFullYear(), m.getMonth(), 1);
+      const e = new Date(m.getFullYear(), m.getMonth() + 1, 0, 23, 59, 59);
+      return getOrdersInRange(s, e).reduce((sum, o) => sum + Number(o.totalPrice), 0);
+    });
+    const expenseData = months.map(m => {
+      const s = new Date(m.getFullYear(), m.getMonth(), 1);
+      const e = new Date(m.getFullYear(), m.getMonth() + 1, 0, 23, 59, 59);
+      return allExpenses.filter(x => x.date && new Date(x.date) >= s && new Date(x.date) <= e)
+        .reduce((sum, x) => sum + Number(x.amount), 0);
+    });
+    const labels = months.map(m => m.toLocaleDateString('th-TH', { month: 'short', year: '2-digit' }));
+
+    drawChart('profitChart', 'profit', labels, [
+      { label: 'รายรับ', data: incomeData, backgroundColor: '#7fae6f' },
+      { label: 'รายจ่าย', data: expenseData, backgroundColor: '#c94b4b' }
+    ]);
+
+    // รายการรายจ่ายล่าสุด
+    const listEl = document.getElementById('expenseList');
+    if (allExpenses.length === 0) {
+      listEl.innerHTML = '<div class="empty-state">ยังไม่มีรายการรายจ่าย</div>';
+    } else {
+      listEl.innerHTML = allExpenses.slice(0, 15).map(e => `
+        <div class="expense-line">
+          <div>
+            <div>${e.note || '(ไม่มีหมายเหตุ)'}</div>
+            <div class="d">${e.date ? fmtDateShort(new Date(e.date)) : '-'}</div>
+          </div>
+          <div class="amt">-${Number(e.amount).toLocaleString('th-TH')} บาท</div>
+        </div>
+      `).join('');
     }
   }
 </script>
