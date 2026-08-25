@@ -361,6 +361,19 @@
       await loadMenu();
     } catch (err) {
       clearTimeout(timeoutId);
+
+      // ถ้า token หมดอายุ (พบบ่อยตอนทดสอบผ่านเบราว์เซอร์ภายนอกที่แคช session เก่าไว้)
+      // ให้ล้าง session แล้วลองล็อกอินใหม่อัตโนมัติ
+      const msg = (err && err.message) || '';
+      if (msg.includes('access token expired') || msg.includes('invalid_request')) {
+        try {
+          if (liff.logout) liff.logout();
+        } catch (e) {}
+        setStatus('เซสชันหมดอายุ กำลังเข้าสู่ระบบใหม่...', 'loading');
+        setTimeout(() => { liff.login(); }, 500);
+        return;
+      }
+
       let message = 'เกิดข้อผิดพลาดในการเชื่อมต่อ LINE';
       if (err && err.code) message += `\nCode: ${err.code}`;
       if (err && err.message) message += `\n${err.message}`;
