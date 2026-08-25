@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard - ร้านน้ำชงน้องน้ำ</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -107,23 +106,6 @@
 
   main { padding: 16px; max-width: 720px; margin: 0 auto; }
 
-  /* ---------- ป้ายเมนูหลัก ---------- */
-  .main-nav {
-    display: flex; gap: 8px; margin-bottom: 18px;
-    background: #fff; border: 1px solid var(--line); border-radius: 16px;
-    padding: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .main-nav button {
-    flex: 1; border: none; background: transparent; cursor: pointer;
-    padding: 10px 6px; border-radius: 12px; font-size: 13px; font-weight: 700;
-    color: var(--brand-light); display: flex; flex-direction: column; align-items: center; gap: 2px;
-  }
-  .main-nav button .ic { font-size: 17px; }
-  .main-nav button.active { background: var(--brand); color: #fff; }
-
-  .section { display: none; }
-  .section.active { display: block; }
-
   .stats-row { display: flex; gap: 10px; margin-bottom: 16px; }
   .stat-card {
     flex: 1; background: var(--card); border-radius: 14px; padding: 12px 10px;
@@ -134,13 +116,6 @@
   .stat-card.c-รอชง .num { color: #a5690b; }
   .stat-card.c-กำลังชง .num { color: #1c5fa8; }
   .stat-card.c-พร้อมรับ .num { color: var(--ok); }
-
-  .subtabs { display: flex; gap: 8px; margin-bottom: 14px; }
-  .subtab-btn {
-    flex: 1; padding: 10px; border-radius: 12px; border: 1.5px solid var(--line);
-    background: #fff; font-size: 13.5px; font-weight: 700; cursor: pointer; color: var(--brand-light);
-  }
-  .subtab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
   .toolbar { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
   .filter-chip {
@@ -164,7 +139,6 @@
     padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     border-left: 4px solid var(--accent);
   }
-  .order-card.done { border-left-color: var(--ok); opacity: .92; }
   .order-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
   .order-id { font-weight: 800; font-size: 14.5px; }
   .order-time { font-size: 11.5px; color: var(--brand-light); margin-top: 2px; }
@@ -175,7 +149,6 @@
   .badge.status-รอชง { background: #fff0da; color: #a5690b; }
   .badge.status-กำลังชง { background: #e2f0ff; color: #1c5fa8; }
   .badge.status-พร้อมรับ { background: #e3f6e6; color: var(--ok); }
-  .badge.status-เสร็จสิ้น { background: #e3f6e6; color: var(--ok); }
   .badge.pay-รอตรวจสอบสลิป { background: #fdeaea; color: var(--danger); }
   .badge.pay-รอชำระที่ร้าน { background: #fff0da; color: #a5690b; }
   .badge.pay-ชำระแล้ว { background: #e3f6e6; color: var(--ok); }
@@ -184,88 +157,14 @@
   .order-cust { font-size: 12.5px; color: var(--brand-light); margin-bottom: 6px; }
 
   .order-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-  .order-actions select, .order-actions .slip-link, .order-actions .done-btn {
+  .order-actions select, .order-actions .slip-link {
     flex: 1; min-width: 120px;
     padding: 9px 10px; border-radius: 10px; border: 1.5px solid var(--line);
     font-size: 13px; background: #fff; text-align: center; text-decoration: none; color: var(--brand);
-    cursor: pointer;
   }
   .order-actions .slip-link { background: #fdf3e8; border-color: var(--accent); color: var(--accent-dark); font-weight: 700; }
-  .order-actions .done-btn { background: var(--ok); border-color: var(--ok); color: #fff; font-weight: 800; }
-
-  .date-group-label {
-    font-size: 13px; font-weight: 800; color: var(--brand-light);
-    margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 1.5px dashed var(--line);
-  }
-  .date-group-label:first-child { margin-top: 0; }
 
   .empty-state { text-align: center; color: #999; padding: 40px 0; font-size: 14px; }
-
-  /* ---------- รายได้ ---------- */
-  .big-total {
-    background: var(--card); border: 1px solid var(--line); border-radius: 18px;
-    padding: 20px; text-align: center; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .big-total .amount { font-size: 30px; font-weight: 800; color: var(--accent-dark); }
-  .big-total .lbl { font-size: 12.5px; color: var(--brand-light); margin-top: 4px; }
-  .chart-card {
-    background: var(--card); border: 1px solid var(--line); border-radius: 18px;
-    padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .chart-card .chart-title { font-size: 13.5px; font-weight: 800; margin-bottom: 10px; color: var(--brand); }
-  .chart-card canvas { max-height: 260px; }
-
-  /* ---------- ต้นทุน ---------- */
-  .summary-row { display: flex; gap: 10px; margin-bottom: 16px; }
-  .summary-card {
-    flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
-    padding: 12px 10px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .summary-card .num { font-size: 17px; font-weight: 800; }
-  .summary-card .lbl { font-size: 10.5px; color: var(--brand-light); margin-top: 2px; }
-  .summary-card.profit .num { color: var(--ok); }
-  .summary-card.loss .num { color: var(--danger); }
-
-  .expense-form {
-    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
-    padding: 14px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .expense-form .row { display: flex; gap: 8px; margin-bottom: 8px; }
-  .expense-form input, .expense-form textarea {
-    width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px;
-    font-size: 13.5px; background: #fbf8f4; outline: none; font-family: inherit;
-  }
-  .expense-form input:focus, .expense-form textarea:focus { border-color: var(--accent); background: #fff; }
-  .expense-form label { font-size: 11.5px; color: var(--brand-light); font-weight: 700; display: block; margin-bottom: 4px; }
-  .expense-form .field { flex: 1; }
-  #addExpenseBtn {
-    width: 100%; padding: 12px; border: none; border-radius: 10px; margin-top: 4px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    color: #fff; font-weight: 800; font-size: 14px; cursor: pointer;
-  }
-
-  .expense-item {
-    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
-    padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .expense-item .info { flex: 1; }
-  .expense-item .desc { font-size: 13.5px; font-weight: 700; }
-  .expense-item .date { font-size: 11.5px; color: var(--brand-light); margin-top: 2px; }
-  .expense-item .amt { font-weight: 800; color: var(--danger); font-size: 14.5px; white-space: nowrap; }
-  .expense-item .del-btn {
-    border: none; background: #fdeaea; color: var(--danger); width: 28px; height: 28px;
-    border-radius: 50%; font-size: 14px; cursor: pointer; flex-shrink: 0;
-  }
-
-  .month-nav {
-    display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 14px;
-  }
-  .month-nav button {
-    border: 1.5px solid var(--line); background: #fff; width: 32px; height: 32px;
-    border-radius: 50%; cursor: pointer; font-size: 14px; color: var(--brand);
-  }
-  .month-nav .month-lbl { font-size: 14.5px; font-weight: 800; min-width: 130px; text-align: center; }
 </style>
 </head>
 <body>
@@ -295,114 +194,28 @@
     <img src="logo.png" alt="โลโก้">
     <div>
       <div class="t">ร้านน้ำชงน้องน้ำ</div>
-      <div class="s" id="headerSub">หน้าจัดการคำสั่งซื้อ</div>
+      <div class="s">หน้าจัดการคำสั่งซื้อ</div>
     </div>
     <button id="logoutBtn" onclick="logout()">ออกจากระบบ</button>
   </header>
 
   <main>
-    <div class="main-nav">
-      <button class="nav-btn active" data-sec="orders" onclick="setSection('orders')">
-        <span class="ic">📋</span> คำสั่งซื้อ
-      </button>
-      <button class="nav-btn" data-sec="revenue" onclick="setSection('revenue')">
-        <span class="ic">💰</span> รายได้
-      </button>
-      <button class="nav-btn" data-sec="costs" onclick="setSection('costs')">
-        <span class="ic">📦</span> ต้นทุน
-      </button>
+    <div class="stats-row">
+      <div class="stat-card c-รอชง"><div class="num" id="statRoChong">0</div><div class="lbl">รอชง</div></div>
+      <div class="stat-card c-กำลังชง"><div class="num" id="statGamlangChong">0</div><div class="lbl">กำลังชง</div></div>
+      <div class="stat-card c-พร้อมรับ"><div class="num" id="statProm">0</div><div class="lbl">พร้อมรับ</div></div>
     </div>
 
-    <!-- ================= หน้าคำสั่งซื้อ ================= -->
-    <section id="section-orders" class="section active">
-      <div class="subtabs">
-        <button class="subtab-btn active" data-t="today" onclick="setOrdersTab('today')">🗓️ วันนี้</button>
-        <button class="subtab-btn" data-t="completed" onclick="setOrdersTab('completed')">✅ ออเดอร์สำเร็จ</button>
-      </div>
+    <div class="toolbar">
+      <div class="filter-chip active" data-f="all" onclick="setFilter('all')">ทั้งหมด</div>
+      <div class="filter-chip" data-f="รอชง" onclick="setFilter('รอชง')">รอชง</div>
+      <div class="filter-chip" data-f="กำลังชง" onclick="setFilter('กำลังชง')">กำลังชง</div>
+      <div class="filter-chip" data-f="พร้อมรับ" onclick="setFilter('พร้อมรับ')">พร้อมรับ</div>
+      <button id="refreshBtn" onclick="loadOrders()">🔄 รีเฟรช</button>
+    </div>
 
-      <div id="todayDateLine" style="font-size:12.5px; color:var(--brand-light); margin-bottom:12px;"></div>
-
-      <div class="stats-row">
-        <div class="stat-card c-รอชง"><div class="num" id="statRoChong">0</div><div class="lbl">รอชง</div></div>
-        <div class="stat-card c-กำลังชง"><div class="num" id="statGamlangChong">0</div><div class="lbl">กำลังชง</div></div>
-        <div class="stat-card c-พร้อมรับ"><div class="num" id="statProm">0</div><div class="lbl">พร้อมรับ</div></div>
-      </div>
-
-      <div class="toolbar" id="orderToolbar">
-        <div class="filter-chip active" data-f="all" onclick="setFilter('all')">ทั้งหมด</div>
-        <div class="filter-chip" data-f="รอชง" onclick="setFilter('รอชง')">รอชง</div>
-        <div class="filter-chip" data-f="กำลังชง" onclick="setFilter('กำลังชง')">กำลังชง</div>
-        <div class="filter-chip" data-f="พร้อมรับ" onclick="setFilter('พร้อมรับ')">พร้อมรับ</div>
-        <button id="refreshBtn" onclick="loadOrders()">🔄 รีเฟรช</button>
-      </div>
-
-      <div id="status" style="display:none;"></div>
-      <div id="orderList"></div>
-    </section>
-
-    <!-- ================= หน้ารายได้ ================= -->
-    <section id="section-revenue" class="section">
-      <div class="toolbar">
-        <div class="filter-chip active" data-r="today" onclick="setRevenueRange('today')">วันนี้</div>
-        <div class="filter-chip" data-r="week" onclick="setRevenueRange('week')">สัปดาห์นี้</div>
-        <div class="filter-chip" data-r="month" onclick="setRevenueRange('month')">เดือนนี้</div>
-        <button id="revenueRefreshBtn" onclick="loadRevenue()">🔄 รีเฟรช</button>
-      </div>
-
-      <div id="revenueStatus" style="display:none;"></div>
-
-      <div class="big-total">
-        <div class="amount" id="revenueTotal">0 บาท</div>
-        <div class="lbl" id="revenueTotalLbl">รายได้วันนี้</div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-title" id="revenueChartTitle">รายได้แยกตามช่วงเวลา</div>
-        <canvas id="revenueChart"></canvas>
-      </div>
-    </section>
-
-    <!-- ================= หน้าต้นทุน ================= -->
-    <section id="section-costs" class="section">
-      <div class="month-nav">
-        <button onclick="shiftMonth(-1)">‹</button>
-        <div class="month-lbl" id="costMonthLbl">-</div>
-        <button onclick="shiftMonth(1)">›</button>
-      </div>
-
-      <div id="costStatus" style="display:none;"></div>
-
-      <div class="summary-row">
-        <div class="summary-card"><div class="num" id="sumRevenue">0</div><div class="lbl">รายได้เดือนนี้</div></div>
-        <div class="summary-card"><div class="num" id="sumCost">0</div><div class="lbl">ต้นทุนเดือนนี้</div></div>
-        <div class="summary-card profit" id="sumProfitCard"><div class="num" id="sumProfit">0</div><div class="lbl">กำไร/ขาดทุน</div></div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-title">กำไร-ขาดทุนรายเดือน</div>
-        <canvas id="profitChart"></canvas>
-      </div>
-
-      <div class="expense-form">
-        <div class="row">
-          <div class="field">
-            <label>วันที่ซื้อของ</label>
-            <input type="date" id="expDate">
-          </div>
-          <div class="field">
-            <label>ยอดเงิน (บาท)</label>
-            <input type="number" id="expAmount" placeholder="0" min="0" step="0.01">
-          </div>
-        </div>
-        <div class="field">
-          <label>รายการ / รายละเอียด</label>
-          <input type="text" id="expDesc" placeholder="เช่น ซื้อนมสด, แก้วพลาสติก, ไซรัป">
-        </div>
-        <button id="addExpenseBtn" onclick="addExpense()">➕ บันทึกรายจ่าย</button>
-      </div>
-
-      <div id="expenseList"></div>
-    </section>
+    <div id="status" style="display:none;"></div>
+    <div id="orderList"></div>
   </main>
 </div>
 
@@ -415,13 +228,7 @@
 
   let allOrders = [];
   let currentFilter = 'all';
-  let ordersTab = 'today';
-  let revenueRange = 'today';
-  let revenueChartObj = null;
-  let profitChartObj = null;
-  let costMonthDate = new Date(); // เดือนที่กำลังดูอยู่ในหน้าต้นทุน
 
-  /* ---------- Login ---------- */
   function tryLogin() {
     const user = document.getElementById('userInput').value.trim();
     const pw = document.getElementById('pwInput').value;
@@ -450,8 +257,6 @@
   function showDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashboardScreen').style.display = 'block';
-    document.getElementById('expDate').valueAsDate = new Date();
-    updateTodayDateLine();
     loadOrders();
   }
 
@@ -459,23 +264,6 @@
     showDashboard();
   }
 
-  /* ---------- นำทางเมนูหลัก ---------- */
-  function setSection(sec) {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.sec === sec));
-    document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === 'section-' + sec));
-    const subs = { orders: 'หน้าจัดการคำสั่งซื้อ', revenue: 'สรุปรายได้', costs: 'บันทึกต้นทุน & กำไรขาดทุน' };
-    document.getElementById('headerSub').textContent = subs[sec];
-    if (sec === 'revenue') loadRevenue();
-    if (sec === 'costs') loadCosts();
-  }
-
-  function updateTodayDateLine() {
-    const d = new Date();
-    document.getElementById('todayDateLine').textContent =
-      '📅 ' + d.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
-  }
-
-  /* ================= หน้าคำสั่งซื้อ ================= */
   function setStatus(text, type) {
     const el = document.getElementById('status');
     el.textContent = text;
@@ -500,329 +288,88 @@
     }
   }
 
-  function isSameDay(a, b) {
-    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-  }
-
-  function todayOrders() {
-    const now = new Date();
-    return allOrders.filter(o => o.timestamp && isSameDay(new Date(o.timestamp), now) && o.orderStatus !== 'เสร็จสิ้น');
-  }
-
-  function completedOrders() {
-    return allOrders.filter(o => o.orderStatus === 'เสร็จสิ้น')
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  }
-
-  function setOrdersTab(tab) {
-    ordersTab = tab;
-    document.querySelectorAll('#section-orders .subtab-btn').forEach(b => b.classList.toggle('active', b.dataset.t === tab));
-    document.getElementById('orderToolbar').style.display = tab === 'today' ? 'flex' : 'none';
-    document.querySelector('#section-orders .stats-row').style.display = tab === 'today' ? 'flex' : 'none';
-    document.getElementById('todayDateLine').style.display = tab === 'today' ? 'block' : 'none';
-    renderOrders();
-  }
-
   function renderStats() {
-    const t = todayOrders();
-    document.getElementById('statRoChong').textContent = t.filter(o => o.orderStatus === 'รอชง').length;
-    document.getElementById('statGamlangChong').textContent = t.filter(o => o.orderStatus === 'กำลังชง').length;
-    document.getElementById('statProm').textContent = t.filter(o => o.orderStatus === 'พร้อมรับ').length;
+    document.getElementById('statRoChong').textContent = allOrders.filter(o => o.orderStatus === 'รอชง').length;
+    document.getElementById('statGamlangChong').textContent = allOrders.filter(o => o.orderStatus === 'กำลังชง').length;
+    document.getElementById('statProm').textContent = allOrders.filter(o => o.orderStatus === 'พร้อมรับ').length;
   }
 
   function setFilter(f) {
     currentFilter = f;
-    document.querySelectorAll('#orderToolbar .filter-chip').forEach(c => {
+    document.querySelectorAll('.filter-chip').forEach(c => {
       c.classList.toggle('active', c.dataset.f === f);
     });
     renderOrders();
   }
 
-  function orderCardHtml(o, opts) {
-    opts = opts || {};
-    const itemsText = (o.items || []).map(i => {
-      const detail = [];
-      if (i.sweetness) detail.push(i.sweetness);
-      if (i.toppings) detail.push(i.toppings);
-      const detailText = detail.length ? ` (${detail.join(', ')})` : '';
-      return `${i.name} × ${i.qty}${detailText}`;
-    }).join(' · ');
-
-    const custText = [o.customerName, o.telephone].filter(Boolean).join(' · ');
-    const timeText = o.timestamp ? new Date(o.timestamp).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '';
-
-    const actionsHtml = opts.completed ? '' : `
-      <div class="order-actions">
-        <select onchange="updateStatus('${o.orderId}', this.value)">
-          <option value="">-- เปลี่ยนสถานะออเดอร์ --</option>
-          <option value="รอชง" ${o.orderStatus === 'รอชง' ? 'selected' : ''}>รอชง</option>
-          <option value="กำลังชง" ${o.orderStatus === 'กำลังชง' ? 'selected' : ''}>กำลังชง</option>
-          <option value="พร้อมรับ" ${o.orderStatus === 'พร้อมรับ' ? 'selected' : ''}>พร้อมรับ</option>
-        </select>
-        ${o.slipUrl ? `<a class="slip-link" href="${o.slipUrl}" target="_blank">🧾 ดูสลิป</a>` : ''}
-        ${o.orderStatus === 'พร้อมรับ' ? `<button class="done-btn" onclick="markDone('${o.orderId}')">✅ ลูกค้ารับแล้ว</button>` : ''}
-      </div>`;
-
-    return `
-      <div class="order-card ${opts.completed ? 'done' : ''}">
-        <div class="order-top">
-          <div>
-            <div class="order-id">${o.orderId}</div>
-            <div class="order-time">${timeText}</div>
-          </div>
-          <div class="order-price">${o.totalPrice} บาท</div>
-        </div>
-
-        ${custText ? `<div class="order-cust">👤 ${custText}</div>` : ''}
-
-        <div class="badge-row">
-          <span class="badge status-${o.orderStatus}">${o.orderStatus || '-'}</span>
-          <span class="badge pay-${o.paymentStatus}">${o.paymentStatus || '-'}</span>
-          <span class="badge" style="background:#eee; color:#555;">${o.paymentMethod || '-'}</span>
-        </div>
-
-        <div class="order-items">${itemsText}</div>
-        ${actionsHtml}
-      </div>`;
-  }
-
   function renderOrders() {
+    const list = currentFilter === 'all'
+      ? allOrders
+      : allOrders.filter(o => o.orderStatus === currentFilter);
+
     const el = document.getElementById('orderList');
 
-    if (ordersTab === 'today') {
-      const list = currentFilter === 'all' ? todayOrders() : todayOrders().filter(o => o.orderStatus === currentFilter);
-      if (list.length === 0) {
-        el.innerHTML = '<div class="empty-state">ไม่มีรายการสั่งซื้อในหมวดนี้</div>';
-        return;
-      }
-      el.innerHTML = list.map(o => orderCardHtml(o)).join('');
-    } else {
-      const list = completedOrders();
-      if (list.length === 0) {
-        el.innerHTML = '<div class="empty-state">ยังไม่มีออเดอร์ที่เสร็จสิ้น</div>';
-        return;
-      }
-      // จัดกลุ่มตามวันที่
-      let html = '';
-      let lastDateKey = null;
-      list.forEach(o => {
-        const d = new Date(o.timestamp);
-        const dateKey = d.toDateString();
-        if (dateKey !== lastDateKey) {
-          html += `<div class="date-group-label">📅 ${d.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })}</div>`;
-          lastDateKey = dateKey;
-        }
-        html += orderCardHtml(o, { completed: true });
-      });
-      el.innerHTML = html;
+    if (list.length === 0) {
+      el.innerHTML = '<div class="empty-state">ไม่มีรายการสั่งซื้อในหมวดนี้</div>';
+      return;
     }
+
+    el.innerHTML = list.map(o => {
+      const itemsText = (o.items || []).map(i => {
+        const detail = [];
+        if (i.sweetness) detail.push(i.sweetness);
+        if (i.toppings) detail.push(i.toppings);
+        const detailText = detail.length ? ` (${detail.join(', ')})` : '';
+        return `${i.name} × ${i.qty}${detailText}`;
+      }).join(' · ');
+
+      const custText = [o.customerName, o.telephone].filter(Boolean).join(' · ');
+      const timeText = o.timestamp ? new Date(o.timestamp).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '';
+
+      return `
+        <div class="order-card">
+          <div class="order-top">
+            <div>
+              <div class="order-id">${o.orderId}</div>
+              <div class="order-time">${timeText}</div>
+            </div>
+            <div class="order-price">${o.totalPrice} บาท</div>
+          </div>
+
+          ${custText ? `<div class="order-cust">👤 ${custText}</div>` : ''}
+
+          <div class="badge-row">
+            <span class="badge status-${o.orderStatus}">${o.orderStatus || '-'}</span>
+            <span class="badge pay-${o.paymentStatus}">${o.paymentStatus || '-'}</span>
+            <span class="badge" style="background:#eee; color:#555;">${o.paymentMethod || '-'}</span>
+          </div>
+
+          <div class="order-items">${itemsText}</div>
+
+          <div class="order-actions">
+            <select onchange="updateStatus('${o.orderId}', this.value)">
+              <option value="">-- เปลี่ยนสถานะออเดอร์ --</option>
+              <option value="รอชง" ${o.orderStatus === 'รอชง' ? 'selected' : ''}>รอชง</option>
+              <option value="กำลังชง" ${o.orderStatus === 'กำลังชง' ? 'selected' : ''}>กำลังชง</option>
+              <option value="พร้อมรับ" ${o.orderStatus === 'พร้อมรับ' ? 'selected' : ''}>พร้อมรับ</option>
+            </select>
+            ${o.slipUrl ? `<a class="slip-link" href="${o.slipUrl}" target="_blank">🧾 ดูสลิป</a>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   async function updateStatus(orderId, newStatus) {
     if (!newStatus) return;
-    await postAction({ action: 'updateOrderStatus', orderId, newStatus });
-  }
-
-  async function markDone(orderId) {
-    await postAction({ action: 'updateOrderStatus', orderId, newStatus: 'เสร็จสิ้น' });
-  }
-
-  async function postAction(body) {
-    try {
-      const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(body) });
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'ดำเนินการไม่สำเร็จ');
-      await loadOrders();
-      return json;
-    } catch (err) {
-      alert('เกิดข้อผิดพลาด: ' + (err.message || err));
-    }
-  }
-
-  /* ================= หน้ารายได้ ================= */
-  // คาดหวังรูปแบบข้อมูลจาก backend (Code.gs):
-  // GET ?action=getRevenue&range=today|week|month
-  // -> { ok: true, data: { total: 1234, labels: [...], values: [...] } }
-  function setRevenueStatus(text, type) {
-    const el = document.getElementById('revenueStatus');
-    el.textContent = text; el.className = type || ''; el.style.display = text ? 'block' : 'none';
-  }
-
-  function setRevenueRange(r) {
-    revenueRange = r;
-    document.querySelectorAll('#section-revenue .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.r === r));
-    loadRevenue();
-  }
-
-  async function loadRevenue() {
-    const labels = { today: 'วันนี้', week: 'สัปดาห์นี้', month: 'เดือนนี้' };
-    document.getElementById('revenueTotalLbl').textContent = 'รายได้' + labels[revenueRange];
-    document.getElementById('revenueChartTitle').textContent = 'รายได้แยกตาม' + (revenueRange === 'today' ? 'ชั่วโมง' : 'วัน');
-    try {
-      setRevenueStatus('กำลังโหลดข้อมูลรายได้...', 'loading');
-      const res = await fetch(API_URL + '?action=getRevenue&range=' + revenueRange, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP Error ' + res.status);
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'โหลดข้อมูลไม่สำเร็จ');
-      setRevenueStatus('', '');
-      const data = json.data || { total: 0, labels: [], values: [] };
-      document.getElementById('revenueTotal').textContent = (data.total || 0).toLocaleString('th-TH') + ' บาท';
-      drawRevenueChart(data.labels || [], data.values || []);
-    } catch (err) {
-      setRevenueStatus('โหลดข้อมูลไม่สำเร็จ: ' + (err.message || err), 'error');
-    }
-  }
-
-  function drawRevenueChart(labels, values) {
-    const ctx = document.getElementById('revenueChart');
-    if (revenueChartObj) revenueChartObj.destroy();
-    revenueChartObj = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [{
-          label: 'รายได้ (บาท)',
-          data: values,
-          backgroundColor: '#c98a4b',
-          borderRadius: 6,
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } }
-      }
-    });
-  }
-
-  /* ================= หน้าต้นทุน ================= */
-  // คาดหวังรูปแบบข้อมูลจาก backend (Code.gs):
-  // GET  ?action=getCostSummary&month=YYYY-MM
-  //   -> { ok:true, data:{ revenue, cost, profit, expenses:[{id,date,description,amount}],
-  //                          monthlyLabels:[...], monthlyProfit:[...] } }
-  // POST { action:'addExpense', date, description, amount } -> { ok:true, data:{id,...} }
-  // POST { action:'deleteExpense', id } -> { ok:true }
-  function setCostStatus(text, type) {
-    const el = document.getElementById('costStatus');
-    el.textContent = text; el.className = type || ''; el.style.display = text ? 'block' : 'none';
-  }
-
-  function monthKey(d) {
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-  }
-
-  function shiftMonth(delta) {
-    costMonthDate = new Date(costMonthDate.getFullYear(), costMonthDate.getMonth() + delta, 1);
-    loadCosts();
-  }
-
-  async function loadCosts() {
-    document.getElementById('costMonthLbl').textContent =
-      costMonthDate.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-    try {
-      setCostStatus('กำลังโหลดข้อมูลต้นทุน...', 'loading');
-      const res = await fetch(API_URL + '?action=getCostSummary&month=' + monthKey(costMonthDate), { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP Error ' + res.status);
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'โหลดข้อมูลไม่สำเร็จ');
-      setCostStatus('', '');
-      renderCostSummary(json.data || {});
-    } catch (err) {
-      setCostStatus('โหลดข้อมูลไม่สำเร็จ: ' + (err.message || err), 'error');
-    }
-  }
-
-  function renderCostSummary(data) {
-    const revenue = data.revenue || 0;
-    const cost = data.cost || 0;
-    const profit = data.profit != null ? data.profit : (revenue - cost);
-
-    document.getElementById('sumRevenue').textContent = revenue.toLocaleString('th-TH');
-    document.getElementById('sumCost').textContent = cost.toLocaleString('th-TH');
-    document.getElementById('sumProfit').textContent = profit.toLocaleString('th-TH');
-    const profitCard = document.getElementById('sumProfitCard');
-    profitCard.classList.toggle('profit', profit >= 0);
-    profitCard.classList.toggle('loss', profit < 0);
-
-    drawProfitChart(data.monthlyLabels || [], data.monthlyProfit || []);
-    renderExpenseList(data.expenses || []);
-  }
-
-  function drawProfitChart(labels, values) {
-    const ctx = document.getElementById('profitChart');
-    if (profitChartObj) profitChartObj.destroy();
-    profitChartObj = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'กำไร/ขาดทุน (บาท)',
-          data: values,
-          borderColor: '#7fae6f',
-          backgroundColor: 'rgba(127,174,111,0.15)',
-          fill: true,
-          tension: 0.3,
-          pointBackgroundColor: '#4a8a5c',
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: false } }
-      }
-    });
-  }
-
-  function renderExpenseList(expenses) {
-    const el = document.getElementById('expenseList');
-    if (!expenses.length) {
-      el.innerHTML = '<div class="empty-state">ยังไม่มีรายการต้นทุนเดือนนี้</div>';
-      return;
-    }
-    const sorted = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
-    el.innerHTML = sorted.map(e => `
-      <div class="expense-item">
-        <div class="info">
-          <div class="desc">${e.description || '-'}</div>
-          <div class="date">${new Date(e.date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
-        </div>
-        <div class="amt">-${Number(e.amount).toLocaleString('th-TH')} บาท</div>
-        <button class="del-btn" onclick="deleteExpense('${e.id}')">✕</button>
-      </div>
-    `).join('');
-  }
-
-  async function addExpense() {
-    const date = document.getElementById('expDate').value;
-    const description = document.getElementById('expDesc').value.trim();
-    const amount = parseFloat(document.getElementById('expAmount').value);
-
-    if (!date) return alert('กรุณาเลือกวันที่');
-    if (!description) return alert('กรุณาระบุรายการ');
-    if (!amount || amount <= 0) return alert('กรุณาระบุยอดเงินให้ถูกต้อง');
-
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'addExpense', date, description, amount })
+        body: JSON.stringify({ action: 'updateOrderStatus', orderId, newStatus })
       });
       const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'บันทึกไม่สำเร็จ');
-      document.getElementById('expDesc').value = '';
-      document.getElementById('expAmount').value = '';
-      await loadCosts();
-    } catch (err) {
-      alert('เกิดข้อผิดพลาด: ' + (err.message || err));
-    }
-  }
-
-  async function deleteExpense(id) {
-    if (!confirm('ลบรายการนี้ใช่ไหม?')) return;
-    try {
-      const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteExpense', id }) });
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'ลบไม่สำเร็จ');
-      await loadCosts();
+      if (!json.ok) throw new Error(json.error || 'อัปเดตไม่สำเร็จ');
+      await loadOrders();
     } catch (err) {
       alert('เกิดข้อผิดพลาด: ' + (err.message || err));
     }
