@@ -167,6 +167,13 @@ button{cursor:pointer}
 .actions .ok{background:var(--green);color:#fff;border-color:var(--green)}
 
 .menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.category-filter{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+.menu-category-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 13px;margin-bottom:15px;box-shadow:var(--shadow)}
+.menu-category-title{font-size:13px;font-weight:900;margin-bottom:9px;color:var(--brown)}
+.category-filter button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:8px 13px;font-size:12px;font-weight:800;color:var(--brown);white-space:nowrap}
+.category-filter button.active{background:#f8eadb;border-color:#e5c8a8;color:var(--orange2)}
+.category-heading{grid-column:1/-1;font-weight:900;font-size:14px;margin:4px 0 -4px}
+.best-category{font-size:11px;color:var(--muted);margin-top:2px}
 .product{overflow:hidden}
 .product img{width:100%;height:150px;object-fit:cover;background:#f1e9e0}
 .product-body{padding:14px}
@@ -264,6 +271,7 @@ button{cursor:pointer}
   .menu-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:600px){
+  .menu-category-box{padding:11px 10px}.category-filter{flex-wrap:nowrap;overflow-x:auto}
   .topbar{padding:0 14px}
   .content{padding:16px 12px}
   .sidebar{display:none}
@@ -479,7 +487,11 @@ button{cursor:pointer}
     <button class="save" onclick="openMenuModal()">＋ เพิ่มเมนู</button>
   </div>
 
-  <div class="menu-grid" id="menuGrid"></div>
+  <div class="menu-category-box">
+      <div class="menu-category-title">📂 เลือกหมวดเมนู</div>
+      <div class="category-filter" id="menuCategoryFilter"></div>
+    </div>
+    <div class="menu-grid" id="menuGrid"></div>
 </section>
 
 <!-- TOPPING -->
@@ -611,6 +623,7 @@ button{cursor:pointer}
 
     <div class="card">
       <h3>🏆 เมนูขายดี</h3>
+      <div class="category-filter" id="bestCategoryFilter"></div>
       <div id="bestMenu"></div>
     </div>
   </div>
@@ -652,6 +665,9 @@ let selectedStart = '';
 let selectedEnd = '';
 let selectedPreset = 'today';
 let reportData = null;
+let selectedMenuCategory = 'ทั้งหมด';
+let selectedBestCategory = 'ทั้งหมด';
+const MENU_CATEGORIES = ['ชา','นม','กาแฟ','ผลไม้','โซดา','เครื่องปั่น'];
 
 /* ========================= LOGIN ========================= */
 
@@ -875,45 +891,6 @@ function applyReportFilter(){
 
 /* ========================= REPORT DATA ========================= */
 
-function buildBestMenuFromOrders(orders, start, end){
-  const totals = {};
-
-  const startDate = parseLocalDate(start);
-  const endDate = parseLocalDate(end);
-
-  if(startDate){
-    startDate.setHours(0,0,0,0);
-  }
-  if(endDate){
-    endDate.setHours(23,59,59,999);
-  }
-
-  (orders || []).forEach(order => {
-    const orderDate = getOrderDate(order.timestamp);
-    if(!orderDate || !startDate || !endDate) return;
-    if(orderDate < startDate || orderDate > endDate) return;
-
-    (order.items || []).forEach(item => {
-      const name = String(
-        item?.name ||
-        item?.menuName ||
-        item?.productName ||
-        ''
-      ).trim();
-
-      if(!name) return;
-
-      const qty = Math.max(1, Number(item?.qty || 1));
-      totals[name] = (totals[name] || 0) + qty;
-    });
-  });
-
-  return Object.entries(totals)
-    .map(([name, qty]) => ({ name, qty }))
-    .sort((a,b) => b.qty - a.qty)
-    .slice(0, 10);
-}
-
 async function loadSelectedReport(
   start = selectedStart,
   end = selectedEnd
@@ -923,8 +900,6 @@ async function loadSelectedReport(
   try{
     setStatus('กำลังโหลดข้อมูลยอดขาย…');
 
-    // getReportData ไม่มี bestMenu ใน Code.gs รุ่นปัจจุบัน
-    // จึงดึง Orders จริงมาคำนวณเมนูขายดีใน Dashboard โดยตรง
     const [d, orders] = await Promise.all([
       apiGet('getReportData',{
         startDate:start,
@@ -932,6 +907,7 @@ async function loadSelectedReport(
       }),
       apiGet('getAllOrders')
     ]);
+    allOrders = Array.isArray(orders) ? orders : allOrders;
 
     reportData = d;
 
@@ -970,27 +946,19 @@ async function loadSelectedReport(
         `รายจ่าย ${money(d.expenses || 0)} บาท · กำไร ${money(d.profit || 0)} บาท`;
     }
 
-    const best = buildBestMenuFromOrders(
-      Array.isArray(orders) ? orders : [],
-      start,
-      end
-    );
-
-    const bestMenu = document.getElementById('bestMenu');
-
-    if(bestMenu){
-      bestMenu.innerHTML = best.length
-        ? best.map((x,i)=>`
-          <div class="order-mini">
-            <div>
-              <div class="oid">${i+1}. ${esc(x.name)}</div>
-              <div class="detail">ยอดขาย ${x.qty} แก้ว</div>
-            </div>
-            <span class="badge b-ready">${x.qty} แก้ว</span>
-          </div>
-        `).join('')
-        : `<div class="empty">ยังไม่มีข้อมูลเมนูในช่วงนี้</div>`;
+    // เมนูขายดี: API รุ่นปัจจุบันยังไม่ได้ส่ง bestMenu มา
+    // จึงคำนวณจากรายการสินค้าใน Orders ตามช่วงวันที่ที่เลือก
+    if(!Array.isArray(allOrders) || !allOrders.length){
+      try{
+        const orders = await apiGet('getAllOrders');
+        allOrders = Array.isArray(orders) ? orders : [];
+      }catch(err){
+        allOrders = [];
+      }
     }
+
+    const best = buildBestMenu(allOrders, start, end);
+    renderBestMenu(best);
 
     draw(
       'reportChart',
@@ -1240,6 +1208,81 @@ function getOrderDate(value){
   return null;
 }
 
+function buildBestMenu(orders,start,end){
+  const startDate=parseLocalDate(start);
+  const endDate=parseLocalDate(end);
+  if(!startDate||!endDate) return [];
+
+  startDate.setHours(0,0,0,0);
+  endDate.setHours(23,59,59,999);
+
+  const menuMap={};
+  (menu||[]).forEach(m=>{
+    const c=m.category||'ชา';
+    menuMap['id:'+String(m.id||'')]=c;
+    menuMap['name:'+String(m.name||'').trim()]=c;
+  });
+
+  const totals={};
+
+  (orders||[]).forEach(o=>{
+    const d=getOrderDate(o.timestamp);
+    if(!d||d<startDate||d>endDate) return;
+
+    (o.items||[]).forEach(item=>{
+      const name=String(item.name||item.menuName||'').trim();
+      if(!name) return;
+
+      const qty=Number(item.qty||item.quantity||1)||1;
+      const category=item.category||menuMap['id:'+String(item.id||'')]||menuMap['name:'+name]||'ชา';
+
+      if(!totals[name]) totals[name]={name,qty:0,category};
+      totals[name].qty+=qty;
+    });
+  });
+
+  return Object.keys(totals)
+    .map(name=>totals[name])
+    .sort((a,b)=>b.qty-a.qty)
+    .slice(0,20);
+}
+
+function renderBestMenu(best){
+  const filterEl=document.getElementById('bestCategoryFilter');
+  const el=document.getElementById('bestMenu');
+  if(!el) return;
+
+  const cats=['ทั้งหมด',...MENU_CATEGORIES];
+
+  if(filterEl){
+    filterEl.innerHTML=cats.map(c=>`
+      <button class="${selectedBestCategory===c?'active':''}" onclick="setBestCategory('${esc(c)}')">${c}</button>
+    `).join('');
+  }
+
+  const visible=selectedBestCategory==='ทั้งหมด'
+    ? best
+    : best.filter(x=>(x.category||'ชา')===selectedBestCategory);
+
+  el.innerHTML=visible.length
+    ? visible.slice(0,10).map((x,i)=>`
+      <div class="order-mini">
+        <div>
+          <div class="oid">${i+1}. ${esc(x.name)}</div>
+          <div class="best-category">หมวด ${esc(x.category||'ชา')} · ขายได้ ${x.qty} แก้ว</div>
+        </div>
+        <span class="badge b-ready">${x.qty} แก้ว</span>
+      </div>
+    `).join('')
+    : `<div class="empty">ยังไม่มีข้อมูลในหมวดนี้</div>`;
+}
+
+function setBestCategory(category){
+  selectedBestCategory=category||'ทั้งหมด';
+  if(selectedStart&&selectedEnd){
+    renderBestMenu(buildBestMenu(allOrders,selectedStart,selectedEnd));
+  }
+}
 function buildSales7(orders){
   const now = new Date();
   const start = new Date(
@@ -1646,66 +1689,67 @@ async function loadMenu(force=false){
 }
 
 function renderMenu(){
-  const el = document.getElementById('menuGrid');
-
+  const el=document.getElementById('menuGrid');
+  const filterEl=document.getElementById('menuCategoryFilter');
   if(!el) return;
 
-  el.innerHTML = menu.length
-    ? menu.map(m=>`
-      <div class="card product">
+  const cats=['ทั้งหมด',...MENU_CATEGORIES];
 
-        <img
-          src="${esc(m.img || 'https://placehold.co/600x400/f4eee7/8a6f5c?text=Drink')}"
-          onerror="this.src='https://placehold.co/600x400/f4eee7/8a6f5c?text=Drink'"
-          alt="${esc(m.name)}"
-        >
+  if(filterEl){
+    filterEl.innerHTML=cats.map(c=>{
+      const count = c==='ทั้งหมด'
+        ? menu.length
+        : menu.filter(m=>(m.category||'ชา')===c).length;
+      return `<button class="${selectedMenuCategory===c?'active':''}" onclick="setMenuCategory('${esc(c)}')">${c} <span style="opacity:.7">(${count})</span></button>`;
+    }).join('');
+  }
 
-        <div class="product-body">
+  const visible=selectedMenuCategory==='ทั้งหมด'
+    ? menu
+    : menu.filter(m=>(m.category||'ชา')===selectedMenuCategory);
 
-          <div class="product-name">
-            ${esc(m.name)}
+  const groups={};
+  visible.forEach(m=>{
+    const c=m.category||'ชา';
+    if(!groups[c]) groups[c]=[];
+    groups[c].push(m);
+  });
+
+  const order=MENU_CATEGORIES.filter(c=>groups[c]);
+
+  el.innerHTML=visible.length
+    ? order.map(c=>`
+      <div class="category-heading">${c}</div>
+      ${groups[c].map(m=>`
+        <div class="card product">
+          <img src="${esc(m.img||'https://placehold.co/600x400/f4eee7/8a6f5c?text=Drink')}"
+               onerror="this.src='https://placehold.co/600x400/f4eee7/8a6f5c?text=Drink'"
+               alt="${esc(m.name)}">
+          <div class="product-body">
+            <div class="product-name">${esc(m.name)}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">${esc(c)}</div>
+            <div class="product-price">${money(m.price)} บาท</div>
+            <div class="product-foot">
+              <span class="badge ${m.status==='soldout'?'b-out':'b-ready'}" style="margin:0">
+                ${m.status==='soldout'?'หมด':'พร้อมขาย'}
+              </span>
+              <button class="switch ${m.status!=='soldout'?'on':''}" onclick="toggleMenu('${esc(m.id)}')"><i></i></button>
+            </div>
+            <div class="mini-actions">
+              <button onclick="openMenuModal('${esc(m.id)}')">✏️ แก้ไข</button>
+              <button onclick="deleteMenu('${esc(m.id)}')">🗑️ ลบ</button>
+            </div>
           </div>
-
-          <div class="product-price">
-            ${money(m.price)} บาท
-          </div>
-
-          <div class="product-foot">
-
-            <span
-              class="badge ${m.status === 'soldout' ? 'b-out' : 'b-ready'}"
-              style="margin:0"
-            >
-              ${m.status === 'soldout' ? 'หมด' : 'พร้อมขาย'}
-            </span>
-
-            <button
-              class="switch ${m.status !== 'soldout' ? 'on' : ''}"
-              onclick="toggleMenu('${esc(m.id)}')"
-            >
-              <i></i>
-            </button>
-
-          </div>
-
-          <div class="mini-actions">
-
-            <button onclick="openMenuModal('${esc(m.id)}')">
-              ✏️ แก้ไข
-            </button>
-
-            <button onclick="deleteMenu('${esc(m.id)}')">
-              🗑️ ลบ
-            </button>
-
-          </div>
-
         </div>
-      </div>
+      `).join('')}
     `).join('')
-    : `<div class="empty">ยังไม่มีเมนู</div>`;
+    : `<div class="empty">ยังไม่มีเมนูในหมวด ${esc(selectedMenuCategory)}</div>`;
 }
 
+function setMenuCategory(category){
+  selectedMenuCategory=category||'ทั้งหมด';
+  renderMenu();
+}
 function renderToppings(){
   const el = document.getElementById('toppingList');
 
@@ -1844,6 +1888,13 @@ function openMenuModal(id=''){
       </div>
 
       <div class="modal-field">
+        <label>หมวดเมนู</label>
+        <select id="mCategory">
+          ${MENU_CATEGORIES.map(c=>`<option value="${c}" ${(x?.category||'ชา')===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+
+      <div class="modal-field">
         <label>สถานะ</label>
 
         <select id="mStatus">
@@ -1886,6 +1937,9 @@ async function saveMenu(id){
   const price =
     Number(document.getElementById('mPrice').value);
 
+  const category =
+    document.getElementById('mCategory').value;
+
   const img =
     document.getElementById('mImg').value.trim();
 
@@ -1903,6 +1957,7 @@ async function saveMenu(id){
         id,
         name,
         price,
+        category,
         img
       });
 
@@ -1916,6 +1971,7 @@ async function saveMenu(id){
         action:'addMenu',
         name,
         price,
+        category,
         img,
         status
       });
