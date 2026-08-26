@@ -167,8 +167,10 @@ button{cursor:pointer}
 .actions .ok{background:var(--green);color:#fff;border-color:var(--green)}
 
 .menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.category-filter{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
-.category-filter button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 11px;font-size:12px;font-weight:800;color:var(--brown)}
+.category-filter{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+.menu-category-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 13px;margin-bottom:15px;box-shadow:var(--shadow)}
+.menu-category-title{font-size:13px;font-weight:900;margin-bottom:9px;color:var(--brown)}
+.category-filter button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:8px 13px;font-size:12px;font-weight:800;color:var(--brown);white-space:nowrap}
 .category-filter button.active{background:#f8eadb;border-color:#e5c8a8;color:var(--orange2)}
 .category-heading{grid-column:1/-1;font-weight:900;font-size:14px;margin:4px 0 -4px}
 .best-category{font-size:11px;color:var(--muted);margin-top:2px}
@@ -259,13 +261,6 @@ button{cursor:pointer}
   background:#fff0f0;color:var(--red);font-size:12px;font-weight:800
 }
 
-.menu-toggle{
-  display:none;border:1px solid var(--line);background:#fff;color:var(--brown);
-  width:42px;height:42px;border-radius:11px;font-size:22px;line-height:1;
-  align-items:center;justify-content:center;flex-shrink:0
-}
-.sidebar-overlay{display:none}
-
 @media(max-width:900px){
   .sidebar{width:78px}
   .nav{justify-content:center}
@@ -276,23 +271,10 @@ button{cursor:pointer}
   .menu-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:600px){
-  .topbar{padding:0 12px;gap:9px}
-  .menu-toggle{display:flex}
+  .menu-category-box{padding:11px 10px}.category-filter{flex-wrap:nowrap;overflow-x:auto}
+  .topbar{padding:0 14px}
   .content{padding:16px 12px}
-  .sidebar{
-    display:block;position:fixed;left:0;top:0;bottom:0;width:280px;
-    z-index:1001;transform:translateX(-105%);transition:transform .22s ease;
-    box-shadow:12px 0 30px rgba(0,0,0,.16);padding-top:22px;overflow-y:auto
-  }
-  body.sidebar-open .sidebar{transform:translateX(0)}
-  .sidebar-overlay{
-    display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);
-    z-index:1000;opacity:0;pointer-events:none;transition:opacity .22s ease
-  }
-  body.sidebar-open .sidebar-overlay{opacity:1;pointer-events:auto}
-  .sidebar .nav{justify-content:flex-start}
-  .sidebar .nav span:not(.ico){display:inline}
-  .sidebar .nav-title{display:block}
+  .sidebar{display:none}
   .cards{grid-template-columns:repeat(2,1fr);gap:9px}
   .card{padding:13px}
   .kpi .num{font-size:20px}
@@ -337,7 +319,6 @@ button{cursor:pointer}
 <div id="app">
 
 <header class="topbar">
-  <button class="menu-toggle" id="menuToggle" type="button" onclick="toggleSidebar()" aria-label="เปิดเมนู">☰</button>
   <img src="logo.png" class="logo" alt="logo">
   <div class="brand">
     <h2>ร้านน้ำชงน้องน้ำ</h2>
@@ -347,7 +328,6 @@ button{cursor:pointer}
 </header>
 
 <div class="layout">
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <aside class="sidebar">
   <div class="nav-title">เมนูหลัก</div>
@@ -507,7 +487,11 @@ button{cursor:pointer}
     <button class="save" onclick="openMenuModal()">＋ เพิ่มเมนู</button>
   </div>
 
-  <div class="category-filter" id="menuCategoryFilter"></div><div class="menu-grid" id="menuGrid"></div>
+  <div class="menu-category-box">
+      <div class="menu-category-title">📂 เลือกหมวดเมนู</div>
+      <div class="category-filter" id="menuCategoryFilter"></div>
+    </div>
+    <div class="menu-grid" id="menuGrid"></div>
 </section>
 
 <!-- TOPPING -->
@@ -702,9 +686,6 @@ function login(){
 
 document.getElementById('pass').addEventListener('keydown', e => {
   if(e.key === 'Enter') login();
-});
-document.addEventListener('keydown', e => {
-  if(e.key === 'Escape') closeSidebar();
 });
 
 function logout(){
@@ -1102,15 +1083,7 @@ function setStatus(t,c){
   e.style.display = t ? 'block' : 'none';
 }
 
-function toggleSidebar(){
-  document.body.classList.toggle('sidebar-open');
-}
-function closeSidebar(){
-  document.body.classList.remove('sidebar-open');
-}
-
 function go(id){
-  closeSidebar();
   document.querySelectorAll('.page')
     .forEach(x=>x.classList.remove('active'));
 
@@ -1723,9 +1696,12 @@ function renderMenu(){
   const cats=['ทั้งหมด',...MENU_CATEGORIES];
 
   if(filterEl){
-    filterEl.innerHTML=cats.map(c=>`
-      <button class="${selectedMenuCategory===c?'active':''}" onclick="setMenuCategory('${esc(c)}')">${c}</button>
-    `).join('');
+    filterEl.innerHTML=cats.map(c=>{
+      const count = c==='ทั้งหมด'
+        ? menu.length
+        : menu.filter(m=>(m.category||'ชา')===c).length;
+      return `<button class="${selectedMenuCategory===c?'active':''}" onclick="setMenuCategory('${esc(c)}')">${c} <span style="opacity:.7">(${count})</span></button>`;
+    }).join('');
   }
 
   const visible=selectedMenuCategory==='ทั้งหมด'
