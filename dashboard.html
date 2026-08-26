@@ -1123,16 +1123,118 @@ function statusClass(s){
 
 function itemsText(items){
   return (items || [])
-    .map(i =>
-      `${esc(i.name)} × ${i.qty || 1}`+
-      `${i.sweetness ? ' ('+esc(i.sweetness)+')' : ''}`+
-      `${i.toppings ? ' · '+esc(
-        Array.isArray(i.toppings)
-          ? i.toppings.join(', ')
-          : i.toppings
-      ) : ''}`
-    )
+    .map(i => {
+      const drinkType = String(
+        i.drinkType || i.temperature || i.type || ''
+      ).trim();
+
+      const container = String(
+        i.container || i.packageType || i.servingType || ''
+      ).trim();
+
+      let toppings = i.toppings || '';
+      if(Array.isArray(toppings)){
+        toppings = toppings.map(t => {
+          if(typeof t === 'string') return t;
+          return t && (t.name || t.id || '');
+        }).filter(Boolean).join(', ');
+      }
+
+      const detail = [];
+
+      // แสดงประเภทเครื่องดื่ม: เย็น / ปั่น / ร้อน
+      if(drinkType){
+        detail.push(drinkType);
+      }
+
+      // แสดงบรรจุภัณฑ์: แก้ว / ถุง
+      if(container){
+        detail.push(container);
+      }
+
+      if(i.sweetness){
+        detail.push('หวาน: ' + String(i.sweetness));
+      }
+
+      if(toppings){
+        detail.push('ท็อปปิ้ง: ' + String(toppings));
+      }
+
+      return (
+        `${esc(i.name)} × ${i.qty || 1}` +
+        (detail.length ? ` (${esc(detail.join(' · '))})` : '')
+      );
+    })
     .join(' • ');
+}
+
+function getOrderDate(value){
+  if(!value) return null;
+
+  const d = new Date(value);
+  if(!isNaN(d.getTime())) return d;
+
+  // รองรับวันที่รูปแบบอื่นเผื่อ API/ข้อมูลเก่า
+  const m = String(value).match(/(\d{4})-(\d{2})-(\d{2})/);
+  if(m){
+    const x = new Date(
+      Number(m[1]),
+      Number(m[2]) - 1,
+      Number(m[3])
+    );
+    if(!isNaN(x.getTime())) return x;
+  }
+
+  return null;
+}
+
+function buildSales7(orders){
+  const now = new Date();
+  const start = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - 6
+  );
+
+  const labels = [];
+  const data = [];
+
+  for(let i=0; i<7; i++){
+    const day = new Date(
+      start.getFullYear(),
+      start.getMonth(),
+      start.getDate() + i
+    );
+
+    const key =
+      day.getFullYear() + '-' +
+      String(day.getMonth()+1).padStart(2,'0') + '-' +
+      String(day.getDate()).padStart(2,'0');
+
+    const sales = (orders || [])
+      .filter(o => {
+        const d = getOrderDate(o.timestamp);
+        if(!d) return false;
+
+        const orderKey =
+          d.getFullYear() + '-' +
+          String(d.getMonth()+1).padStart(2,'0') + '-' +
+          String(d.getDate()).padStart(2,'0');
+
+        return orderKey === key;
+      })
+      .reduce((sum,o) => sum + Number(o.totalPrice || 0), 0);
+
+    labels.push(
+      day.toLocaleDateString('th-TH', {
+        day:'numeric',
+        month:'short'
+      })
+    );
+    data.push(sales);
+  }
+
+  return { labels, data };
 }
 
 /* ========================= HOME ========================= */
@@ -1143,19 +1245,40 @@ async function loadHome(force=false){
   busy.home = true;
 
   try{
-    const d = await apiGet('getDashboardData');
+    // Dashboard API เดิมไม่มี sales7 / ordersNeedAction / soldOut
+    // จึงดึง Orders มาคำนวณและแสดงข้อมูลให้ตรงกับข้อมูลจริงในชีต
+    const [d, orders] = await Promise.all([
+      apiGet('getDashboardData'),
+      apiGet('getAllOrders')
+    ]);
+
+    allOrders = Array.isArray(orders) ? orders : [];
+
+    const soldOutMenus =
+      d.soldOutMenus ||
+      d.soldOut?.menu ||
+      [];
+
+    const soldOutToppings =
+      d.soldOutToppings ||
+      d.soldOut?.toppings ||
+      [];
 
     safeText(
       'kOut',
-      d.soldOut?.count || 0
+      soldOutMenus.length + soldOutToppings.length
     );
 
-    const active = d.ordersNeedAction || [];
+    // แสดงออเดอร์ที่ยังไม่เสร็จ โดยเอาจาก Orders จริง
+    const active = allOrders
+      .filter(o => o.orderStatus !== 'เสร็จสิ้น')
+      .slice(0, 5);
+
     const homeOrders = document.getElementById('homeOrders');
 
     if(homeOrders){
       homeOrders.innerHTML = active.length
-        ? active.slice(0,5).map(o=>`
+        ? active.map(o=>`
           <div class="order-mini">
             <div>
               <div class="oid">
@@ -1167,7 +1290,7 @@ async function loadHome(force=false){
             </div>
 
             <span class="badge ${statusClass(o.orderStatus)}">
-              ${esc(o.orderStatus)}
+              ${esc(o.orderStatus || '-')}
             </span>
           </div>
         `).join('')
@@ -1175,10 +1298,8 @@ async function loadHome(force=false){
     }
 
     const out = [
-      ...(d.soldOut?.menu || [])
-        .map(x=>'🥤 '+x.name),
-      ...(d.soldOut?.toppings || [])
-        .map(x=>'🧋 '+x.name)
+      ...soldOutMenus.map(x => '🥤 ' + x.name),
+      ...soldOutToppings.map(x => '🧋 ' + x.name)
     ];
 
     const homeOut = document.getElementById('homeOut');
@@ -1191,16 +1312,21 @@ async function loadHome(force=false){
         : `<div style="color:#999">ทุกสินค้าพร้อมขายค่ะ ✓</div>`;
     }
 
-    const sales7 = d.sales7 || [];
+    // สร้างยอดขาย 7 วันล่าสุดจาก Orders จริง
+    const sales7 = buildSales7(allOrders);
 
     draw(
       'homeChart',
       'home',
       'line',
-      sales7.map(x=>x.label),
+      sales7.labels,
       [{
         label:'ยอดขาย',
-        data:sales7.map(x=>Number(x.sales || 0))
+        data:sales7.data,
+        borderWidth:2,
+        tension:0.35,
+        pointRadius:4,
+        pointHoverRadius:6
       }]
     );
 
@@ -2214,20 +2340,36 @@ function draw(
   charts[key] = new Chart(el,{
     type,
     data:{
-      labels,
-      datasets
+      labels: labels || [],
+      datasets: datasets || []
     },
     options:{
       responsive:true,
       maintainAspectRatio:false,
+      interaction:{
+        intersect:false,
+        mode:'index'
+      },
       plugins:{
         legend:{
           display:false
+        },
+        tooltip:{
+          callbacks:{
+            label:function(context){
+              return 'ยอดขาย: ' + money(context.parsed.y) + ' บาท';
+            }
+          }
         }
       },
       scales:{
         y:{
-          beginAtZero:true
+          beginAtZero:true,
+          ticks:{
+            callback:function(value){
+              return money(value);
+            }
+          }
         }
       }
     }
