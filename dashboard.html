@@ -49,6 +49,16 @@ button{cursor:pointer}
   height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;
   align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:20
 }
+.mobile-menu-btn{
+  display:none;width:42px;height:42px;border:1px solid var(--line);background:#fff;
+  border-radius:10px;align-items:center;justify-content:center;flex-direction:column;
+  gap:4px;padding:0;flex-shrink:0
+}
+.mobile-menu-btn span{
+  display:block;width:20px;height:2px;background:var(--brown);border-radius:2px
+}
+.mobile-menu-backdrop{display:none}
+.mobile-menu-head{display:none}
 .topbar .logo{width:42px;height:42px;margin:0}
 .brand h2{font-size:17px}
 .brand small{color:var(--muted)}
@@ -272,9 +282,30 @@ button{cursor:pointer}
 }
 @media(max-width:600px){
   .menu-category-box{padding:11px 10px}.category-filter{flex-wrap:nowrap;overflow-x:auto}
-  .topbar{padding:0 14px}
+  .topbar{padding:0 10px 0 8px;gap:10px}
+  .mobile-menu-btn{display:flex}
   .content{padding:16px 12px}
-  .sidebar{display:none}
+  .sidebar{
+    display:block;position:fixed;top:0;left:0;width:min(290px,86vw);height:100vh;
+    z-index:1001;padding:18px 12px;background:#fff;border-right:1px solid var(--line);
+    box-shadow:12px 0 35px rgba(75,54,40,.18);transform:translateX(-105%);
+    transition:transform .22s ease;overflow-y:auto
+  }
+  .sidebar.mobile-open{transform:translateX(0)}
+  .mobile-menu-head{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:0 4px 14px;border-bottom:1px solid var(--line);margin-bottom:12px
+  }
+  .mobile-menu-head strong{font-size:14px}
+  .mobile-menu-close{
+    width:34px;height:34px;border:0;background:#faf3eb;border-radius:9px;
+    color:var(--brown);font-size:23px;line-height:1
+  }
+  .mobile-menu-backdrop{
+    display:block;position:fixed;inset:0;background:rgba(0,0,0,.38);
+    z-index:1000;opacity:0;visibility:hidden;pointer-events:none;transition:.22s ease
+  }
+  .mobile-menu-backdrop.show{opacity:1;visibility:visible;pointer-events:auto}
   .cards{grid-template-columns:repeat(2,1fr);gap:9px}
   .card{padding:13px}
   .kpi .num{font-size:20px}
@@ -319,6 +350,10 @@ button{cursor:pointer}
 <div id="app">
 
 <header class="topbar">
+  <button class="mobile-menu-btn" id="mobileMenuBtn" type="button"
+          onclick="toggleMobileMenu()" aria-label="เปิดเมนูหลัก" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
   <img src="logo.png" class="logo" alt="logo">
   <div class="brand">
     <h2>ร้านน้ำชงน้องน้ำ</h2>
@@ -329,7 +364,13 @@ button{cursor:pointer}
 
 <div class="layout">
 
-<aside class="sidebar">
+<div class="mobile-menu-backdrop" id="mobileMenuBackdrop" onclick="closeMobileMenu()"></div>
+
+<aside class="sidebar" id="mainSidebar">
+  <div class="mobile-menu-head">
+    <strong>เมนูหลัก</strong>
+    <button class="mobile-menu-close" type="button" onclick="closeMobileMenu()" aria-label="ปิดเมนู">×</button>
+  </div>
   <div class="nav-title">เมนูหลัก</div>
 
   <button class="nav active" data-page="home" onclick="go('home')">
@@ -1071,6 +1112,41 @@ async function apiPost(data){
   return j.data;
 }
 
+/* ========================= MOBILE MENU ========================= */
+
+function toggleMobileMenu(){
+  const sidebar = document.getElementById('mainSidebar');
+  const backdrop = document.getElementById('mobileMenuBackdrop');
+  const button = document.getElementById('mobileMenuBtn');
+
+  if(!sidebar || !backdrop) return;
+
+  const open = sidebar.classList.toggle('mobile-open');
+  backdrop.classList.toggle('show', open);
+
+  if(button){
+    button.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+
+function closeMobileMenu(){
+  const sidebar = document.getElementById('mainSidebar');
+  const backdrop = document.getElementById('mobileMenuBackdrop');
+  const button = document.getElementById('mobileMenuBtn');
+
+  if(sidebar) sidebar.classList.remove('mobile-open');
+  if(backdrop) backdrop.classList.remove('show');
+  if(button) button.setAttribute('aria-expanded','false');
+
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape') closeMobileMenu();
+});
+
 /* ========================= UTIL ========================= */
 
 function setStatus(t,c){
@@ -1084,6 +1160,8 @@ function setStatus(t,c){
 }
 
 function go(id){
+  closeMobileMenu();
+
   document.querySelectorAll('.page')
     .forEach(x=>x.classList.remove('active'));
 
