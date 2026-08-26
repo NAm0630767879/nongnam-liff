@@ -926,18 +926,32 @@ async function loadSelectedReport(
         `รายจ่าย ${money(d.expenses || 0)} บาท · กำไร ${money(d.profit || 0)} บาท`;
     }
 
-    const best = d.bestMenu || [];
+    // เมนูขายดี: API รุ่นปัจจุบันยังไม่ได้ส่ง bestMenu มา
+    // จึงคำนวณจากรายการสินค้าใน Orders ตามช่วงวันที่ที่เลือก
+    if(!Array.isArray(allOrders) || !allOrders.length){
+      try{
+        const orders = await apiGet('getAllOrders');
+        allOrders = Array.isArray(orders) ? orders : [];
+      }catch(err){
+        allOrders = [];
+      }
+    }
+
+    const best = buildBestMenu(allOrders, start, end);
     const bestMenu = document.getElementById('bestMenu');
 
     if(bestMenu){
       bestMenu.innerHTML = best.length
         ? best.map((x,i)=>`
           <div class="order-mini">
-            <b>${i+1}. ${esc(x.name)}</b>
-            <span class="badge b-ready">${x.qty || 0} แก้ว</span>
+            <div>
+              <b>${i+1}. ${esc(x.name)}</b>
+              <div class="detail">ขายได้ ${x.qty} แก้ว</div>
+            </div>
+            <span class="badge b-ready">${x.qty} แก้ว</span>
           </div>
         `).join('')
-        : `<div class="empty">ยังไม่มีข้อมูลในช่วงนี้</div>`;
+        : `<div class="empty">ยังไม่มีข้อมูลเมนูในช่วงนี้</div>`;
     }
 
     draw(
@@ -1186,6 +1200,36 @@ function getOrderDate(value){
   }
 
   return null;
+}
+
+function buildBestMenu(orders, start, end){
+  const startDate = parseLocalDate(start);
+  const endDate = parseLocalDate(end);
+  if(!startDate || !endDate) return [];
+
+  startDate.setHours(0,0,0,0);
+  endDate.setHours(23,59,59,999);
+
+  const totals = {};
+
+  (orders || []).forEach(o => {
+    const d = getOrderDate(o.timestamp);
+    if(!d || d < startDate || d > endDate) return;
+
+    (o.items || []).forEach(item => {
+      const name = String(item.name || item.menuName || '').trim();
+      if(!name) return;
+
+      const qty = Number(item.qty || item.quantity || 1) || 1;
+      if(!totals[name]) totals[name] = 0;
+      totals[name] += qty;
+    });
+  });
+
+  return Object.keys(totals)
+    .map(name => ({name, qty: totals[name]}))
+    .sort((a,b) => b.qty - a.qty)
+    .slice(0,10);
 }
 
 function buildSales7(orders){
