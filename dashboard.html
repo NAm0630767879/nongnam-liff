@@ -49,16 +49,6 @@ button{cursor:pointer}
   height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;
   align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:20
 }
-.mobile-menu-btn{
-  display:none;width:42px;height:42px;border:1px solid var(--line);background:#fff;
-  border-radius:10px;align-items:center;justify-content:center;flex-direction:column;
-  gap:4px;padding:0;flex-shrink:0
-}
-.mobile-menu-btn span{
-  display:block;width:20px;height:2px;background:var(--brown);border-radius:2px
-}
-.mobile-menu-backdrop{display:none}
-.mobile-menu-head{display:none}
 .topbar .logo{width:42px;height:42px;margin:0}
 .brand h2{font-size:17px}
 .brand small{color:var(--muted)}
@@ -177,10 +167,8 @@ button{cursor:pointer}
 .actions .ok{background:var(--green);color:#fff;border-color:var(--green)}
 
 .menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.category-filter{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
-.menu-category-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 13px;margin-bottom:15px;box-shadow:var(--shadow)}
-.menu-category-title{font-size:13px;font-weight:900;margin-bottom:9px;color:var(--brown)}
-.category-filter button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:8px 13px;font-size:12px;font-weight:800;color:var(--brown);white-space:nowrap}
+.category-filter{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.category-filter button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 11px;font-size:12px;font-weight:800;color:var(--brown)}
 .category-filter button.active{background:#f8eadb;border-color:#e5c8a8;color:var(--orange2)}
 .category-heading{grid-column:1/-1;font-weight:900;font-size:14px;margin:4px 0 -4px}
 .best-category{font-size:11px;color:var(--muted);margin-top:2px}
@@ -280,32 +268,105 @@ button{cursor:pointer}
   .grid2{grid-template-columns:1fr}
   .menu-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ================= MOBILE NAVIGATION ================= */
+.mobile-menu-btn{
+  display:none;
+  width:44px;
+  height:44px;
+  flex:0 0 44px;
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:10px;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  line-height:1;
+  color:var(--brown);
+  box-shadow:0 2px 8px rgba(75,54,40,.06);
+}
+.mobile-menu-btn:active{transform:scale(.97)}
+
+.mobile-menu-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.42);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:.2s ease;
+  z-index:998;
+}
+.mobile-menu{
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  width:min(300px,84vw);
+  background:#fff;
+  box-shadow:10px 0 30px rgba(0,0,0,.18);
+  transform:translateX(-105%);
+  transition:transform .24s ease;
+  z-index:999;
+  overflow-y:auto;
+  padding:calc(18px + env(safe-area-inset-top)) 12px 24px;
+}
+.mobile-menu-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 8px 14px;
+  margin-bottom:4px;
+  border-bottom:1px solid var(--line);
+}
+.mobile-menu-title{
+  font-weight:900;
+  font-size:15px;
+}
+.mobile-menu-close{
+  width:40px;
+  height:40px;
+  border:0;
+  background:transparent;
+  border-radius:10px;
+  font-size:30px;
+  line-height:1;
+  color:var(--brown);
+}
+.mobile-menu .nav{
+  display:flex;
+  width:100%;
+  padding:13px 12px;
+  margin-bottom:4px;
+}
+.mobile-menu .nav span:not(.ico){
+  display:inline;
+}
+body.mobile-nav-open{
+  overflow:hidden;
+}
+body.mobile-nav-open .mobile-menu-overlay{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+body.mobile-nav-open .mobile-menu{
+  transform:translateX(0);
+}
+
 @media(max-width:600px){
-  .menu-category-box{padding:11px 10px}.category-filter{flex-wrap:nowrap;overflow-x:auto}
-  .topbar{padding:0 10px 0 8px;gap:10px}
   .mobile-menu-btn{display:flex}
+  .topbar{
+    height:72px;
+    padding:0 12px;
+    gap:10px;
+  }
+  .topbar .logo{width:42px;height:42px}
+  .brand h2{font-size:16px}
+  .brand small{font-size:12px}
+  .logout{padding:8px 10px;font-size:12px}
   .content{padding:16px 12px}
-  .sidebar{
-    display:block;position:fixed;top:0;left:0;width:min(290px,86vw);height:100vh;
-    z-index:1001;padding:18px 12px;background:#fff;border-right:1px solid var(--line);
-    box-shadow:12px 0 35px rgba(75,54,40,.18);transform:translateX(-105%);
-    transition:transform .22s ease;overflow-y:auto
-  }
-  .sidebar.mobile-open{transform:translateX(0)}
-  .mobile-menu-head{
-    display:flex;align-items:center;justify-content:space-between;gap:10px;
-    padding:0 4px 14px;border-bottom:1px solid var(--line);margin-bottom:12px
-  }
-  .mobile-menu-head strong{font-size:14px}
-  .mobile-menu-close{
-    width:34px;height:34px;border:0;background:#faf3eb;border-radius:9px;
-    color:var(--brown);font-size:23px;line-height:1
-  }
-  .mobile-menu-backdrop{
-    display:block;position:fixed;inset:0;background:rgba(0,0,0,.38);
-    z-index:1000;opacity:0;visibility:hidden;pointer-events:none;transition:.22s ease
-  }
-  .mobile-menu-backdrop.show{opacity:1;visibility:visible;pointer-events:auto}
+  .sidebar{display:none}
   .cards{grid-template-columns:repeat(2,1fr);gap:9px}
   .card{padding:13px}
   .kpi .num{font-size:20px}
@@ -318,8 +379,7 @@ button{cursor:pointer}
   .date-row{grid-template-columns:1fr 1fr}
   .date-apply{grid-column:1/-1;width:100%}
   .date-filter-head{align-items:flex-start;flex-direction:column}
-}
-</style>
+}</style>
 </head>
 
 <body>
@@ -350,10 +410,7 @@ button{cursor:pointer}
 <div id="app">
 
 <header class="topbar">
-  <button class="mobile-menu-btn" id="mobileMenuBtn" type="button"
-          onclick="toggleMobileMenu()" aria-label="เปิดเมนูหลัก" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
+  <button class="mobile-menu-btn" type="button" aria-label="เปิดเมนูหลัก" aria-expanded="false" onclick="toggleMobileMenu()">☰</button>
   <img src="logo.png" class="logo" alt="logo">
   <div class="brand">
     <h2>ร้านน้ำชงน้องน้ำ</h2>
@@ -364,14 +421,41 @@ button{cursor:pointer}
 
 <div class="layout">
 
-<div class="mobile-menu-backdrop" id="mobileMenuBackdrop" onclick="closeMobileMenu()"></div>
-
-<aside class="sidebar" id="mainSidebar">
-  <div class="mobile-menu-head">
-    <strong>เมนูหลัก</strong>
-    <button class="mobile-menu-close" type="button" onclick="closeMobileMenu()" aria-label="ปิดเมนู">×</button>
-  </div>
+<aside class="sidebar">
   <div class="nav-title">เมนูหลัก</div>
+
+  <button class="nav active" data-page="home" onclick="go('home')">
+    <span class="ico">🏠</span><span>Dashboard หลัก</span>
+  </button>
+
+  <button class="nav" data-page="orders" onclick="go('orders')">
+    <span class="ico">🧾</span><span>จัดการออเดอร์</span>
+  </button>
+
+  <button class="nav" data-page="menu" onclick="go('menu')">
+    <span class="ico">🥤</span><span>จัดการเมนู</span>
+  </button>
+
+  <button class="nav" data-page="products" onclick="go('products')">
+    <span class="ico">🧋</span><span>จัดการท็อปปิ้ง</span>
+  </button>
+
+  <button class="nav" data-page="finance" onclick="go('finance')">
+    <span class="ico">💰</span><span>รายรับ–รายจ่าย</span>
+  </button>
+
+  <button class="nav" data-page="reports" onclick="go('reports')">
+    <span class="ico">📊</span><span>รายงาน / สถิติ</span>
+  </button>
+</aside>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu-overlay" onclick="closeMobileMenu()" aria-hidden="true"></div>
+<aside class="mobile-menu" id="mobileMenu" aria-label="เมนูหลักสำหรับมือถือ">
+  <div class="mobile-menu-head">
+    <div class="mobile-menu-title">เมนูหลัก</div>
+    <button class="mobile-menu-close" type="button" aria-label="ปิดเมนู" onclick="closeMobileMenu()">×</button>
+  </div>
 
   <button class="nav active" data-page="home" onclick="go('home')">
     <span class="ico">🏠</span><span>Dashboard หลัก</span>
@@ -528,11 +612,7 @@ button{cursor:pointer}
     <button class="save" onclick="openMenuModal()">＋ เพิ่มเมนู</button>
   </div>
 
-  <div class="menu-category-box">
-      <div class="menu-category-title">📂 เลือกหมวดเมนู</div>
-      <div class="category-filter" id="menuCategoryFilter"></div>
-    </div>
-    <div class="menu-grid" id="menuGrid"></div>
+  <div class="category-filter" id="menuCategoryFilter"></div><div class="menu-grid" id="menuGrid"></div>
 </section>
 
 <!-- TOPPING -->
@@ -1112,41 +1192,6 @@ async function apiPost(data){
   return j.data;
 }
 
-/* ========================= MOBILE MENU ========================= */
-
-function toggleMobileMenu(){
-  const sidebar = document.getElementById('mainSidebar');
-  const backdrop = document.getElementById('mobileMenuBackdrop');
-  const button = document.getElementById('mobileMenuBtn');
-
-  if(!sidebar || !backdrop) return;
-
-  const open = sidebar.classList.toggle('mobile-open');
-  backdrop.classList.toggle('show', open);
-
-  if(button){
-    button.setAttribute('aria-expanded', open ? 'true' : 'false');
-  }
-
-  document.body.style.overflow = open ? 'hidden' : '';
-}
-
-function closeMobileMenu(){
-  const sidebar = document.getElementById('mainSidebar');
-  const backdrop = document.getElementById('mobileMenuBackdrop');
-  const button = document.getElementById('mobileMenuBtn');
-
-  if(sidebar) sidebar.classList.remove('mobile-open');
-  if(backdrop) backdrop.classList.remove('show');
-  if(button) button.setAttribute('aria-expanded','false');
-
-  document.body.style.overflow = '';
-}
-
-document.addEventListener('keydown', e=>{
-  if(e.key === 'Escape') closeMobileMenu();
-});
-
 /* ========================= UTIL ========================= */
 
 function setStatus(t,c){
@@ -1159,9 +1204,25 @@ function setStatus(t,c){
   e.style.display = t ? 'block' : 'none';
 }
 
+function toggleMobileMenu(){
+  const open = !document.body.classList.contains('mobile-nav-open');
+  document.body.classList.toggle('mobile-nav-open', open);
+  const btn = document.querySelector('.mobile-menu-btn');
+  if(btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+function closeMobileMenu(){
+  document.body.classList.remove('mobile-nav-open');
+  const btn = document.querySelector('.mobile-menu-btn');
+  if(btn) btn.setAttribute('aria-expanded','false');
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape') closeMobileMenu();
+});
+
 function go(id){
   closeMobileMenu();
-
   document.querySelectorAll('.page')
     .forEach(x=>x.classList.remove('active'));
 
@@ -1774,12 +1835,9 @@ function renderMenu(){
   const cats=['ทั้งหมด',...MENU_CATEGORIES];
 
   if(filterEl){
-    filterEl.innerHTML=cats.map(c=>{
-      const count = c==='ทั้งหมด'
-        ? menu.length
-        : menu.filter(m=>(m.category||'ชา')===c).length;
-      return `<button class="${selectedMenuCategory===c?'active':''}" onclick="setMenuCategory('${esc(c)}')">${c} <span style="opacity:.7">(${count})</span></button>`;
-    }).join('');
+    filterEl.innerHTML=cats.map(c=>`
+      <button class="${selectedMenuCategory===c?'active':''}" onclick="setMenuCategory('${esc(c)}')">${c}</button>
+    `).join('');
   }
 
   const visible=selectedMenuCategory==='ทั้งหมด'
