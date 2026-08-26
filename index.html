@@ -6,713 +6,87 @@
 <title>สั่งเครื่องดื่ม - ร้านน้ำชงน้องน้ำ</title>
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --brand: #4a3728;
-    --brand-light: #8a6f5c;
-    --accent: #c98a4b;
-    --accent-dark: #a86f36;
-    --bg: #faf6f0;
-    --card: #ffffff;
-    --line: #ece3d8;
-    --danger: #c94b4b;
-  }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai", sans-serif;
-    background: var(--bg);
-    color: var(--brand);
-    padding-bottom: 100px;
-    font-size: 15.5px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-  }
-  header {
-    position: relative;
-    background: linear-gradient(135deg, #6b4a35, #4a3728);
-    color: #fff;
-    padding: 22px 18px 26px;
-    border-radius: 0 0 22px 22px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  header .logo-img {
-    width: 52px; height: 52px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(255,255,255,0.6);
-    flex-shrink: 0;
-    background: #fff;
-  }
-  header .header-text { flex: 1; min-width: 0; }
-  header .title { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-  header .sub { font-size: 12.5px; opacity: 0.85; margin-top: 4px; }
-
-  #cartIconBtn {
-    position: relative;
-    background: rgba(255,255,255,0.15);
-    border: none;
-    width: 42px; height: 42px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    color: #fff;
-    flex-shrink: 0;
-    cursor: pointer;
-  }
-  #cartIconBadge {
-    position: absolute;
-    top: -4px; right: -4px;
-    background: var(--accent);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 800;
-    min-width: 18px; height: 18px;
-    border-radius: 9px;
-    display: none;
-    align-items: center; justify-content: center;
-    padding: 0 4px;
-    border: 2px solid var(--brand);
-  }
-
-  #status {
-    margin: 14px 16px 0;
-    padding: 12px 14px;
-    border-radius: 10px;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-  #status.loading { background: #f1ece3; color: #6b5a48; }
-  #status.error { background: #fdeaea; color: var(--danger); white-space: pre-wrap; }
-
-  main { padding: 16px; }
-  h3.section-title {
-    font-size: 15px;
-    font-weight: 700;
-    margin: 18px 0 10px;
-    color: var(--brand);
-  }
-
-  .menu-grid { display: flex; flex-direction: column; gap: 10px; }
-  .menu-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .menu-card img {
-    width: 64px; height: 64px;
-    object-fit: cover;
-    border-radius: 12px;
-    background: var(--line);
-    flex-shrink: 0;
-  }
-  .menu-card .info { flex: 1; min-width: 0; }
-  .menu-card .name { font-weight: 700; font-size: 16.5px; }
-  .menu-card .price { color: var(--accent-dark); font-weight: 600; font-size: 14.5px; margin-top: 2px; }
-  .add-btn {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: 9px 16px;
-    border-radius: 20px;
-    font-size: 14.5px;
-    font-weight: 700;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  .add-btn:active { background: var(--accent-dark); }
-
-  /* Cart summary bar */
-  #cartBar {
-    position: fixed;
-    left: 0; right: 0; bottom: 0;
-    background: var(--brand);
-    color: #fff;
-    padding: 12px 16px;
-    display: none;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 -3px 12px rgba(0,0,0,0.15);
-    z-index: 40;
-  }
-  #cartBar .left { font-size: 13.5px; }
-  #cartBar .left b { font-size: 16px; }
-  #cartBar button {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 22px;
-    font-weight: 700;
-    font-size: 14px;
-  }
-
-  /* Modal (item options) */
-  .overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.45);
-    display: none;
-    align-items: flex-end;
-    z-index: 50;
-  }
-  .overlay.show { display: flex; }
-  .sheet {
-    background: #fff;
-    width: 100%;
-    max-height: 88vh;
-    overflow-y: auto;
-    border-radius: 20px 20px 0 0;
-    padding: 18px 18px 20px;
-    animation: slideUp .2s ease-out;
-  }
-  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .sheet-head { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
-  .sheet-head img { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; background: var(--line); }
-  .sheet-head .name { font-weight: 700; font-size: 17px; }
-  .sheet-head .price { color: var(--accent-dark); font-weight: 600; font-size: 14px; margin-top: 2px; }
-  .close-x { margin-left: auto; background: none; border: none; font-size: 20px; color: #999; cursor: pointer; padding: 4px; }
-
-  .option-group { margin: 16px 0; }
-  .option-label { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
-  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip {
-    border: 1.5px solid var(--line);
-    background: #fff;
-    border-radius: 20px;
-    padding: 9px 15px;
-    font-size: 14.5px;
-    cursor: pointer;
-    user-select: none;
-  }
-  .chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
-  .topping-row {
-    display: flex; align-items: center; justify-content: space-between;
-    border: 1.5px solid var(--line);
-    border-radius: 12px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    cursor: pointer;
-  }
-  .topping-row.selected { border-color: var(--accent); background: #fdf3e8; }
-  .topping-row .t-name { font-size: 15px; font-weight: 600; }
-  .topping-row .t-price { font-size: 13.5px; color: var(--brand-light); }
-  .topping-row .check {
-    width: 20px; height: 20px; border-radius: 6px;
-    border: 1.5px solid var(--line); flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; color: #fff;
-  }
-  .topping-row.selected .check { background: var(--accent); border-color: var(--accent); }
-
-  .qty-row { display: flex; align-items: center; justify-content: center; gap: 18px; margin: 18px 0 4px; }
-  .qty-btn {
-    width: 38px; height: 38px; border-radius: 50%;
-    border: 1.5px solid var(--line); background: #fff;
-    font-size: 18px; font-weight: 700; color: var(--brand);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .qty-num { font-size: 18px; font-weight: 700; min-width: 24px; text-align: center; }
-
-  .sheet-add-btn {
-    width: 100%; padding: 14px; margin-top: 14px;
-    background: var(--accent); color: #fff; border: none;
-    border-radius: 14px; font-size: 15.5px; font-weight: 700;
-  }
-
-  /* Cart page */
-  #cartOverlay .sheet { max-height: 92vh; }
-  .cart-line {
-    border-bottom: 1px dashed var(--line);
-    padding: 10px 0;
-    display: flex; justify-content: space-between; gap: 10px;
-  }
-  .cart-line .desc { font-size: 14.5px; }
-  .cart-line .desc .n { font-weight: 700; font-size: 15.5px; }
-  .cart-line .desc .d { color: var(--brand-light); font-size: 13.5px; margin-top: 2px; }
-  .cart-line .p { text-align: right; font-weight: 700; font-size: 15px; white-space: nowrap; }
-  .cart-line .rm { color: var(--danger); font-size: 12px; margin-top: 4px; cursor: pointer; }
-  .cart-empty { color: #999; text-align: center; padding: 24px 0; font-size: 14px; }
-
-  label.field-label { display: block; font-size: 14px; color: #6b5a48; margin: 12px 0 5px; font-weight: 600; }
-  input[type="text"], input[type="tel"] {
-    width: 100%; padding: 12px 13px; border: 1.5px solid var(--line);
-    border-radius: 10px; font-size: 15.5px; font-family: inherit;
-  }
-  .pay-row { display: flex; gap: 8px; margin-top: 6px; }
-  .pay-row label {
-    flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-    border: 1.5px solid var(--line); border-radius: 12px; padding: 11px; font-size: 14.5px; cursor: pointer;
-  }
-  .pay-row input:checked + span { font-weight: 700; }
-  .pay-row .active { border-color: var(--accent); background: #fdf3e8; color: var(--accent-dark); font-weight: 700; }
-  #slipSection { display: none; margin-top: 10px; }
-  #slipPreview { max-width: 140px; border-radius: 10px; margin-top: 8px; display: none; border: 1px solid var(--line); }
-
-  .total-line { display: flex; justify-content: space-between; font-size: 17px; font-weight: 800; margin: 16px 0 6px; }
-  #confirmBtn {
-    width: 100%; padding: 15px; font-size: 17px; font-weight: 800;
-    background: var(--accent); color: #fff; border: none; border-radius: 14px; margin-top: 10px;
-  }
-  #confirmBtn:disabled { background: #ccc; }
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--brand:#4a3728;--brand-light:#8a6f5c;--accent:#c98a4b;--accent-dark:#a86f36;--bg:#faf6f0;--card:#fff;--line:#ece3d8;--danger:#c94b4b}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans Thai",sans-serif;background:var(--bg);color:var(--brand);padding-bottom:100px;font-size:15.5px}
+header{background:linear-gradient(135deg,#6b4a35,#4a3728);color:#fff;padding:22px 18px 26px;border-radius:0 0 22px 22px;box-shadow:0 4px 14px rgba(0,0,0,.12);display:flex;align-items:center;gap:12px}
+.logo-img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.6);background:#fff}
+.header-text{flex:1}.title{font-size:20px;font-weight:700}.sub{font-size:12.5px;opacity:.85;margin-top:4px}
+#cartIconBtn{position:relative;background:rgba(255,255,255,.15);border:0;width:42px;height:42px;border-radius:50%;font-size:20px;color:#fff}
+#cartIconBadge{position:absolute;top:-4px;right:-4px;background:var(--accent);color:#fff;font-size:11px;font-weight:800;min-width:18px;height:18px;border-radius:9px;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--brand)}
+#status{margin:14px 16px 0;padding:12px 14px;border-radius:10px;font-size:14px;line-height:1.5}.loading{background:#f1ece3;color:#6b5a48}.error{background:#fdeaea;color:var(--danger);white-space:pre-wrap}
+main{padding:16px}.section-title{font-size:15px;font-weight:700;margin:18px 0 10px}.menu-grid{display:flex;flex-direction:column;gap:10px}
+.menu-card{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}.menu-card img{width:64px;height:64px;object-fit:cover;border-radius:12px;background:var(--line)}.info{flex:1}.name{font-weight:700;font-size:16.5px}.price{color:var(--accent-dark);font-weight:600;font-size:14.5px;margin-top:2px}
+.add-btn{background:var(--accent);color:#fff;border:0;padding:9px 16px;border-radius:20px;font-size:14.5px;font-weight:700}.soldout{background:#eee!important;color:#888!important;cursor:not-allowed}
+#cartBar{position:fixed;left:0;right:0;bottom:0;background:var(--brand);color:#fff;padding:12px 16px;display:none;align-items:center;justify-content:space-between;box-shadow:0 -3px 12px rgba(0,0,0,.15);z-index:40}#cartBar button{background:var(--accent);color:#fff;border:0;padding:10px 20px;border-radius:22px;font-weight:700}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:50}.overlay.show{display:flex}.sheet{background:#fff;width:100%;max-height:92vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:18px}
+.sheet-head{display:flex;gap:12px;align-items:center;margin-bottom:12px}.sheet-head img{width:60px;height:60px;border-radius:12px;object-fit:cover;background:var(--line)}.close-x{margin-left:auto;background:none;border:0;font-size:20px;color:#999}
+.option-group{margin:16px 0}.option-label{font-weight:700;font-size:14px;margin-bottom:8px}.chip-row{display:flex;flex-wrap:wrap;gap:8px}.chip{border:1.5px solid var(--line);background:#fff;border-radius:20px;padding:9px 15px;font-size:14.5px;cursor:pointer;user-select:none}.chip.selected{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}.chip.required-empty{border-color:var(--danger);color:var(--danger);background:#fff8f8}.required-note{color:var(--danger);font-size:12.5px;margin-top:5px}
+.topping-row{display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer}.topping-row.selected{border-color:var(--accent);background:#fdf3e8}.t-name{font-size:15px;font-weight:600}.t-price{font-size:13.5px;color:var(--brand-light)}.check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--line)}
+.qty-row{display:flex;align-items:center;justify-content:center;gap:18px;margin:18px 0 4px}.qty-btn{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line);background:#fff;font-size:18px;font-weight:700}.qty-num{font-size:18px;font-weight:700;min-width:24px;text-align:center}
+.sheet-add-btn,#confirmBtn{width:100%;padding:14px;margin-top:14px;background:var(--accent);color:#fff;border:0;border-radius:14px;font-size:15.5px;font-weight:700}
+.cart-line{border-bottom:1px dashed var(--line);padding:10px 0;display:flex;justify-content:space-between;gap:10px}.cart-line .d{color:var(--brand-light);font-size:13.5px;margin-top:2px}.cart-line .rm{color:var(--danger);font-size:12px;margin-top:4px;cursor:pointer}.cart-line .p{font-weight:700;white-space:nowrap}.total-line{display:flex;justify-content:space-between;font-size:17px;font-weight:800;margin:16px 0 6px}
+.field-label{display:block;font-size:14px;color:#6b5a48;margin:12px 0 5px;font-weight:600}input[type=text],input[type=tel]{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:10px;font-size:15.5px}.pay-row{display:flex;gap:8px}.pay-row label{flex:1;display:flex;justify-content:center;border:1.5px solid var(--line);border-radius:12px;padding:11px;cursor:pointer}.pay-row .active{border-color:var(--accent);background:#fdf3e8;color:var(--accent-dark);font-weight:700}#slipSection{display:none;margin-top:10px}#slipPreview{max-width:140px;border-radius:10px;margin-top:8px;display:none;border:1px solid var(--line)}
 </style>
 </head>
 <body>
-
-<header>
-  <img src="logo.png" class="logo-img" alt="โลโก้ร้านน้ำชงน้องน้ำ">
-  <div class="header-text">
-    <div class="title">ร้านน้ำชงน้องน้ำ</div>
-    <div class="sub">เลือกเมนู กดสั่งได้เลยค่ะ</div>
-  </div>
-  <button id="cartIconBtn" onclick="openCart()">
-    🛒
-    <span id="cartIconBadge">0</span>
-  </button>
-</header>
-
+<header><img src="logo.png" class="logo-img" alt="โลโก้ร้าน"><div class="header-text"><div class="title">ร้านน้ำชงน้องน้ำ</div><div class="sub">เลือกเมนู กดสั่งได้เลยค่ะ</div></div><button id="cartIconBtn" onclick="openCart()">🛒<span id="cartIconBadge">0</span></button></header>
 <div id="status" class="loading">กำลังโหลด...</div>
+<main id="menuSection" style="display:none"><h3 class="section-title">เมนูเครื่องดื่ม</h3><div class="menu-grid" id="menuList"></div></main>
+<div id="cartBar"><div><span id="cartCount">0</span> รายการ · <b><span id="cartTotal">0</span> บาท</b></div><button onclick="openCart()">ดูตะกร้า</button></div>
 
-<main id="menuSection" style="display:none;">
-  <h3 class="section-title">เมนูเครื่องดื่ม</h3>
-  <div class="menu-grid" id="menuList"></div>
-</main>
+<div class="overlay" id="itemOverlay"><div class="sheet">
+<div class="sheet-head"><img id="mImg"><div><div class="name" id="mName"></div><div class="price" id="mPrice"></div></div><button class="close-x" onclick="closeItemModal()">✕</button></div>
+<div class="option-group"><div class="option-label">รูปแบบเครื่องดื่ม <span style="color:#c94b4b">*</span></div><div class="chip-row" id="drinkTypeChips"></div><div class="required-note" id="drinkTypeNote" style="display:none">กรุณาเลือก ปั่น / เย็น / ร้อน</div></div>
+<div class="option-group"><div class="option-label">บรรจุภัณฑ์ <span style="color:#c94b4b">*</span></div><div class="chip-row" id="containerChips"></div><div class="required-note" id="containerNote" style="display:none">กรุณาเลือก แก้ว หรือ ถุง</div></div>
+<div class="option-group"><div class="option-label">ระดับความหวาน</div><div class="chip-row" id="sweetnessChips"></div></div>
+<div class="option-group" id="toppingGroup"><div class="option-label">ท็อปปิ้ง (เลือกได้หลายอย่าง)</div><div id="toppingList"></div></div>
+<div class="option-group"><div class="option-label">จำนวน</div><div class="qty-row"><button class="qty-btn" onclick="changeQty(-1)">−</button><div class="qty-num" id="qtyNum">1</div><button class="qty-btn" onclick="changeQty(1)">+</button></div></div>
+<button class="sheet-add-btn" onclick="addSelectionToCart()">เพิ่มลงตะกร้า · <span id="itemTotalPrice">0</span> บาท</button>
+</div></div>
 
-<!-- แถบตะกร้าด้านล่าง -->
-<div id="cartBar">
-  <div class="left"><span id="cartCount">0</span> รายการ · <b><span id="cartTotal">0</span> บาท</b></div>
-  <button onclick="openCart()">ดูตะกร้า</button>
-</div>
-
-<!-- Modal เลือกตัวเลือกสินค้า -->
-<div class="overlay" id="itemOverlay">
-  <div class="sheet">
-    <div class="sheet-head">
-      <img id="mImg" src="" alt="">
-      <div>
-        <div class="name" id="mName"></div>
-        <div class="price" id="mPrice"></div>
-      </div>
-      <button class="close-x" onclick="closeItemModal()">✕</button>
-    </div>
-
-    <div class="option-group">
-      <div class="option-label">ระดับความหวาน</div>
-      <div class="chip-row" id="sweetnessChips"></div>
-    </div>
-
-    <div class="option-group" id="toppingGroup">
-      <div class="option-label">ท็อปปิ้ง (เลือกได้หลายอย่าง)</div>
-      <div id="toppingList"></div>
-    </div>
-
-    <div class="option-group">
-      <div class="option-label">จำนวน</div>
-      <div class="qty-row">
-        <button class="qty-btn" onclick="changeQty(-1)">−</button>
-        <div class="qty-num" id="qtyNum">1</div>
-        <button class="qty-btn" onclick="changeQty(1)">+</button>
-      </div>
-    </div>
-
-    <button class="sheet-add-btn" onclick="addSelectionToCart()">เพิ่มลงตะกร้า · <span id="itemTotalPrice">0</span> บาท</button>
-  </div>
-</div>
-
-<!-- Modal ตะกร้า/ยืนยันคำสั่งซื้อ -->
-<div class="overlay" id="cartOverlay">
-  <div class="sheet">
-    <div class="sheet-head">
-      <div class="name">ตะกร้าสินค้า</div>
-      <button class="close-x" onclick="closeCart()">✕</button>
-    </div>
-
-    <div id="cartLines"></div>
-
-    <div class="total-line">
-      <span>ยอดรวม</span>
-      <span><span id="cartModalTotal">0</span> บาท</span>
-    </div>
-
-    <label class="field-label" for="custName">ชื่อผู้รับ <span style="color:#c94b4b;">*</span></label>
-    <input type="text" id="custName" placeholder="ชื่อ-นามสกุล">
-
-    <label class="field-label" for="custTel">เบอร์โทรศัพท์ <span style="color:#c94b4b;">*</span></label>
-    <input type="tel" id="custTel" placeholder="0812345678">
-
-    <label class="field-label">วิธีการชำระเงิน</label>
-    <div class="pay-row">
-      <label id="payTransferLabel">
-        <input type="radio" name="paymentMethod" value="โอนเงิน" onchange="onPaymentChange()" style="display:none;">
-        <span>💸 โอนเงิน</span>
-      </label>
-      <label id="payShopLabel" class="active">
-        <input type="radio" name="paymentMethod" value="ชำระที่ร้าน" onchange="onPaymentChange()" checked style="display:none;">
-        <span>🏪 ชำระที่ร้าน</span>
-      </label>
-    </div>
-
-    <div id="slipSection">
-      <label class="field-label" for="slipInput">แนบสลิปการโอนเงิน</label>
-      <input type="file" id="slipInput" accept="image/*" onchange="onSlipSelected(event)">
-      <img id="slipPreview">
-    </div>
-
-    <button id="confirmBtn" onclick="confirmOrder()">ยืนยันคำสั่งซื้อ</button>
-  </div>
-</div>
+<div class="overlay" id="cartOverlay"><div class="sheet"><div class="sheet-head"><div class="name">ตะกร้าสินค้า</div><button class="close-x" onclick="closeCart()">✕</button></div><div id="cartLines"></div><div class="total-line"><span>ยอดรวม</span><span><span id="cartModalTotal">0</span> บาท</span></div>
+<label class="field-label">ชื่อผู้รับ *</label><input type="text" id="custName" placeholder="ชื่อ-นามสกุล">
+<label class="field-label">เบอร์โทรศัพท์ *</label><input type="tel" id="custTel" placeholder="0812345678">
+<label class="field-label">วิธีการชำระเงิน</label><div class="pay-row"><label id="payTransferLabel"><input type="radio" name="paymentMethod" value="โอนเงิน" onchange="onPaymentChange()" style="display:none"><span>💸 โอนเงิน</span></label><label id="payShopLabel" class="active"><input type="radio" name="paymentMethod" value="ชำระที่ร้าน" onchange="onPaymentChange()" checked style="display:none"><span>🏪 ชำระที่ร้าน</span></label></div>
+<div id="slipSection"><label class="field-label">แนบสลิปการโอนเงิน</label><input type="file" accept="image/*" onchange="onSlipSelected(event)"><img id="slipPreview"></div><button id="confirmBtn" onclick="confirmOrder()">ยืนยันคำสั่งซื้อ</button>
+</div></div>
 
 <script>
-  const API_URL = 'https://script.google.com/macros/s/AKfycbyXd7Vht8MRECpCWk1XyyVmoB4JSxJFYZBiGuQS027Xq5QHoeyy4LxSIT1rl50u1_sO/exec';
-  const LIFF_ID = '2011058922-zZ7LXynR';
+const API_URL='https://script.google.com/macros/s/AKfycbyXd7Vht8MRECpCWk1XyyVmoB4JSxJFYZBiGuQS027Xq5QHoeyy4LxSIT1rl50u1_sO/exec';
+const LIFF_ID='2011058922-zZ7LXynR';
+const SWEETNESS_OPTIONS=['ปกติ','หวานน้อย','หวานมาก','ไม่หวาน'];
+const DRINK_TYPE_OPTIONS=[{value:'เย็น',label:'🧊 เย็น'},{value:'ปั่น',label:'🥤 ปั่น'},{value:'ร้อน',label:'🔥 ร้อน'}];
+const CONTAINER_OPTIONS=[{value:'แก้ว',label:'🥤 แก้ว'},{value:'ถุง',label:'🛍️ ถุง +10 บาท'}];
+let cart=[],profile=null,slipBase64=null,toppingsData=[],currentItem=null,currentDrinkType='',currentContainer='',currentSweetness=SWEETNESS_OPTIONS[0],currentToppings=[],currentQty=1;
 
-  const SWEETNESS_OPTIONS = ['ปกติ', 'หวานน้อย', 'หวานมาก', 'ไม่หวาน'];
+function setStatus(text,type){const e=document.getElementById('status');e.textContent=text;e.className=type||'';e.style.display=text?'block':'none'}
+async function init(){try{setStatus('กำลังเชื่อมต่อ LINE...','loading');await liff.init({liffId:LIFF_ID});if(!liff.isLoggedIn()){liff.login();return}profile=await liff.getProfile();await loadMenu()}catch(err){setStatus('เกิดข้อผิดพลาดในการเชื่อมต่อ LINE\n'+(err.message||err),'error')}}
+async function loadMenu(){try{setStatus('กำลังโหลดเมนู...','loading');const res=await fetch(API_URL+'?action=getMenu',{cache:'no-store'});const json=await res.json();if(!json.ok)throw new Error(json.error);const menu=json.data.menu||[];toppingsData=(json.data.toppings||[]).filter(t=>!t.status||t.status==='available');document.getElementById('menuList').innerHTML=menu.map(m=>{const ok=!m.status||m.status==='available';return `<div class="menu-card">${m.img?`<img src="${m.img}" alt="${m.name}" onerror="this.style.display='none'">`:''}<div class="info"><div class="name">${m.name}</div><div class="price">${m.price} บาท</div></div>${ok?`<button class="add-btn" onclick='openItemModal(${JSON.stringify(m)})'>เลือก</button>`:`<button class="add-btn soldout" disabled>หมด</button>`}</div>`}).join('');document.getElementById('menuSection').style.display='block';setStatus('','')}catch(err){setStatus('โหลดเมนูไม่สำเร็จ: '+err.message,'error')}}
 
-  let cart = [];
-  let profile = null;
-  let slipBase64 = null;
-  let toppingsData = [];
-
-  // สถานะของ modal เลือกสินค้าปัจจุบัน
-  let currentItem = null;
-  let currentSweetness = SWEETNESS_OPTIONS[0];
-  let currentToppings = [];
-  let currentQty = 1;
-
-  function setStatus(text, type) {
-    const el = document.getElementById('status');
-    el.textContent = text;
-    el.className = type || '';
-    el.style.display = text ? 'block' : 'none';
-  }
-
-  async function init() {
-    const timeoutId = setTimeout(() => {
-      setStatus('เชื่อมต่อ LINE ไม่สำเร็จภายในเวลาที่กำหนด กรุณาตรวจสอบ LIFF Endpoint URL และ Scope', 'error');
-    }, 10000);
-
-    try {
-      setStatus('กำลังเชื่อมต่อ LINE...', 'loading');
-      await liff.init({ liffId: LIFF_ID });
-      clearTimeout(timeoutId);
-
-      if (!liff.isLoggedIn()) {
-        setStatus('กำลังเข้าสู่ระบบ LINE...', 'loading');
-        liff.login();
-        return;
-      }
-
-      profile = await liff.getProfile();
-      await loadMenu();
-    } catch (err) {
-      clearTimeout(timeoutId);
-
-      // ถ้า token หมดอายุ (พบบ่อยตอนทดสอบผ่านเบราว์เซอร์ภายนอกที่แคช session เก่าไว้)
-      // ให้ล้าง session แล้วลองล็อกอินใหม่อัตโนมัติ
-      const msg = (err && err.message) || '';
-      if (msg.includes('access token expired') || msg.includes('invalid_request')) {
-        try {
-          if (liff.logout) liff.logout();
-        } catch (e) {}
-        setStatus('เซสชันหมดอายุ กำลังเข้าสู่ระบบใหม่...', 'loading');
-        setTimeout(() => { liff.login(); }, 500);
-        return;
-      }
-
-      let message = 'เกิดข้อผิดพลาดในการเชื่อมต่อ LINE';
-      if (err && err.code) message += `\nCode: ${err.code}`;
-      if (err && err.message) message += `\n${err.message}`;
-      setStatus(message, 'error');
-    }
-  }
-
-  async function loadMenu() {
-    try {
-      setStatus('กำลังโหลดเมนู...', 'loading');
-      const res = await fetch(API_URL + '?action=getMenu', { method: 'GET', cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP Error ' + res.status);
-
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'โหลดเมนูไม่สำเร็จ');
-
-      const menu = json.data.menu || [];
-      toppingsData = json.data.toppings || [];
-
-      if (menu.length === 0) {
-        setStatus('ขณะนี้ยังไม่มีเมนูในระบบ', 'error');
-        return;
-      }
-
-      document.getElementById('menuList').innerHTML = menu.map(m => `
-        <div class="menu-card">
-          ${m.img ? `<img src="${m.img}" alt="${m.name}" onerror="this.style.display='none'">` : ''}
-          <div class="info">
-            <div class="name">${m.name}</div>
-            <div class="price">${m.price} บาท</div>
-          </div>
-          <button class="add-btn" onclick='openItemModal(${JSON.stringify(m)})'>เลือก</button>
-        </div>
-      `).join('');
-
-      document.getElementById('menuSection').style.display = 'block';
-      setStatus('', '');
-    } catch (err) {
-      setStatus('โหลดเมนูไม่สำเร็จ: ' + (err.message || err), 'error');
-    }
-  }
-
-  // ---------- Modal เลือกตัวเลือกสินค้า ----------
-  function openItemModal(item) {
-    currentItem = item;
-    currentSweetness = SWEETNESS_OPTIONS[0];
-    currentToppings = [];
-    currentQty = 1;
-
-    document.getElementById('mImg').src = item.img || '';
-    document.getElementById('mImg').style.display = item.img ? 'block' : 'none';
-    document.getElementById('mName').textContent = item.name;
-    document.getElementById('mPrice').textContent = item.price + ' บาท';
-
-    document.getElementById('sweetnessChips').innerHTML = SWEETNESS_OPTIONS.map(s => `
-      <div class="chip ${s === currentSweetness ? 'selected' : ''}" data-s="${s}" onclick="selectSweetness('${s}')">${s}</div>
-    `).join('');
-
-    const toppingGroup = document.getElementById('toppingGroup');
-    if (toppingsData.length === 0) {
-      toppingGroup.style.display = 'none';
-    } else {
-      toppingGroup.style.display = 'block';
-      document.getElementById('toppingList').innerHTML = toppingsData.map(t => `
-        <div class="topping-row" data-id="${t.id}" onclick="toggleTopping('${t.id}')">
-          <div>
-            <div class="t-name">${t.name}</div>
-            <div class="t-price">+${t.price} บาท</div>
-          </div>
-          <div class="check"></div>
-        </div>
-      `).join('');
-    }
-
-    document.getElementById('qtyNum').textContent = currentQty;
-    updateItemTotalDisplay();
-    document.getElementById('itemOverlay').classList.add('show');
-  }
-
-  function closeItemModal() {
-    document.getElementById('itemOverlay').classList.remove('show');
-  }
-
-  function selectSweetness(s) {
-    currentSweetness = s;
-    document.querySelectorAll('#sweetnessChips .chip').forEach(c => {
-      c.classList.toggle('selected', c.dataset.s === s);
-    });
-  }
-
-  function toggleTopping(id) {
-    const idx = currentToppings.findIndex(t => t.id === id);
-    if (idx >= 0) {
-      currentToppings.splice(idx, 1);
-    } else {
-      const t = toppingsData.find(t => t.id === id);
-      if (t) currentToppings.push(t);
-    }
-    document.querySelectorAll('.topping-row').forEach(row => {
-      row.classList.toggle('selected', currentToppings.some(t => t.id === row.dataset.id));
-    });
-    updateItemTotalDisplay();
-  }
-
-  function changeQty(delta) {
-    currentQty = Math.max(1, currentQty + delta);
-    document.getElementById('qtyNum').textContent = currentQty;
-    updateItemTotalDisplay();
-  }
-
-  function calcUnitPrice() {
-    const toppingSum = currentToppings.reduce((s, t) => s + Number(t.price), 0);
-    return Number(currentItem.price) + toppingSum;
-  }
-
-  function updateItemTotalDisplay() {
-    document.getElementById('itemTotalPrice').textContent = calcUnitPrice() * currentQty;
-  }
-
-  function addSelectionToCart() {
-    const unitPrice = calcUnitPrice();
-    cart.push({
-      name: currentItem.name,
-      basePrice: Number(currentItem.price),
-      sweetness: currentSweetness,
-      toppings: currentToppings.map(t => ({ name: t.name, price: t.price })),
-      qty: currentQty,
-      unitPrice: unitPrice,
-      subtotal: unitPrice * currentQty
-    });
-    closeItemModal();
-    renderCartBar();
-  }
-
-  // ---------- แถบตะกร้า / cart modal ----------
-  function cartTotal() {
-    return cart.reduce((s, c) => s + c.subtotal, 0);
-  }
-
-  function renderCartBar() {
-    const bar = document.getElementById('cartBar');
-    const count = cart.reduce((s, c) => s + c.qty, 0);
-    const badge = document.getElementById('cartIconBadge');
-
-    if (count > 0) {
-      badge.textContent = count;
-      badge.style.display = 'flex';
-    } else {
-      badge.style.display = 'none';
-    }
-
-    if (cart.length === 0) {
-      bar.style.display = 'none';
-      return;
-    }
-    bar.style.display = 'flex';
-    document.getElementById('cartCount').textContent = count;
-    document.getElementById('cartTotal').textContent = cartTotal();
-  }
-
-  function openCart() {
-    renderCartLines();
-    document.getElementById('cartOverlay').classList.add('show');
-  }
-  function closeCart() {
-    document.getElementById('cartOverlay').classList.remove('show');
-  }
-
-  function renderCartLines() {
-    const el = document.getElementById('cartLines');
-    if (cart.length === 0) {
-      el.innerHTML = '<div class="cart-empty">ยังไม่มีรายการในตะกร้า</div>';
-    } else {
-      el.innerHTML = cart.map((c, i) => {
-        const toppingText = c.toppings.length ? c.toppings.map(t => t.name).join(', ') : 'ไม่ใส่ท็อปปิ้ง';
-        return `
-        <div class="cart-line">
-          <div class="desc">
-            <div class="n">${c.name} × ${c.qty}</div>
-            <div class="d">หวาน: ${c.sweetness} · ${toppingText}</div>
-            <div class="rm" onclick="removeItem(${i})">ลบรายการนี้</div>
-          </div>
-          <div class="p">${c.subtotal} บาท</div>
-        </div>`;
-      }).join('');
-    }
-    document.getElementById('cartModalTotal').textContent = cartTotal();
-  }
-
-  function removeItem(index) {
-    cart.splice(index, 1);
-    renderCartLines();
-    renderCartBar();
-    if (cart.length === 0) closeCart();
-  }
-
-  function onPaymentChange() {
-    const method = document.querySelector('input[name="paymentMethod"]:checked').value;
-    document.getElementById('slipSection').style.display = (method === 'โอนเงิน') ? 'block' : 'none';
-    document.getElementById('payTransferLabel').classList.toggle('active', method === 'โอนเงิน');
-    document.getElementById('payShopLabel').classList.toggle('active', method === 'ชำระที่ร้าน');
-  }
-
-  function onSlipSelected(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      slipBase64 = e.target.result;
-      const preview = document.getElementById('slipPreview');
-      preview.src = slipBase64;
-      preview.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  }
-
-  async function confirmOrder() {
-    if (cart.length === 0) {
-      alert('กรุณาเลือกเมนูก่อนยืนยันคำสั่งซื้อ');
-      return;
-    }
-
-    const custName = document.getElementById('custName').value.trim();
-    const custTel = document.getElementById('custTel').value.trim();
-
-    if (!custName) {
-      alert('กรุณากรอกชื่อผู้รับก่อนยืนยันคำสั่งซื้อ');
-      document.getElementById('custName').focus();
-      return;
-    }
-    if (!custTel) {
-      alert('กรุณากรอกเบอร์โทรศัพท์ก่อนยืนยันคำสั่งซื้อ');
-      document.getElementById('custTel').focus();
-      return;
-    }
-
-    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-    if (paymentMethod === 'โอนเงิน' && !slipBase64) {
-      alert('กรุณาแนบสลิปการโอนเงิน');
-      return;
-    }
-
-    const btn = document.getElementById('confirmBtn');
-    btn.disabled = true;
-    btn.textContent = 'กำลังส่งคำสั่งซื้อ...';
-
-    const items = cart.map(c => ({
-      name: c.name,
-      sweetness: c.sweetness,
-      toppings: c.toppings.map(t => t.name).join(', '),
-      qty: c.qty,
-      price: c.subtotal
-    }));
-
-    const payload = {
-      action: 'createOrder',
-      userId: profile.userId,
-      name: custName,
-      telephone: custTel,
-      items: items,
-      totalPrice: cartTotal(),
-      paymentMethod: paymentMethod,
-      image: paymentMethod === 'โอนเงิน' ? slipBase64 : null
-    };
-
-    try {
-      const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-      const json = await res.json();
-
-      if (json.ok) {
-        alert('สั่งซื้อสำเร็จ! 🎉\nหมายเลขคำสั่งซื้อ: ' + json.orderId);
-        cart = [];
-        slipBase64 = null;
-        closeCart();
-        renderCartBar();
-        liff.closeWindow();
-      } else {
-        throw new Error(json.error || 'สั่งซื้อไม่สำเร็จ');
-      }
-    } catch (err) {
-      alert('เกิดข้อผิดพลาด: ' + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'ยืนยันคำสั่งซื้อ';
-    }
-  }
-
-  init();
+function openItemModal(item){currentItem=item;currentDrinkType='';currentContainer='';currentSweetness=SWEETNESS_OPTIONS[0];currentToppings=[];currentQty=1;document.getElementById('mImg').src=item.img||'';document.getElementById('mImg').style.display=item.img?'block':'none';document.getElementById('mName').textContent=item.name;document.getElementById('mPrice').textContent=item.price+' บาท';
+document.getElementById('drinkTypeChips').innerHTML=DRINK_TYPE_OPTIONS.map(o=>`<div class="chip" data-type="${o.value}" onclick="selectDrinkType('${o.value}')">${o.label}</div>`).join('');
+document.getElementById('containerChips').innerHTML=CONTAINER_OPTIONS.map(o=>`<div class="chip" data-container="${o.value}" onclick="selectContainer('${o.value}')">${o.label}</div>`).join('');
+document.getElementById('sweetnessChips').innerHTML=SWEETNESS_OPTIONS.map(s=>`<div class="chip ${s===currentSweetness?'selected':''}" data-s="${s}" onclick="selectSweetness('${s}')">${s}</div>`).join('');
+const tg=document.getElementById('toppingGroup');tg.style.display=toppingsData.length?'block':'none';if(toppingsData.length)document.getElementById('toppingList').innerHTML=toppingsData.map(t=>`<div class="topping-row" data-id="${t.id}" onclick="toggleTopping('${t.id}')"><div><div class="t-name">${t.name}</div><div class="t-price">+${t.price} บาท</div></div><div class="check"></div></div>`).join('');
+document.getElementById('qtyNum').textContent=1;updateItemTotalDisplay();document.getElementById('itemOverlay').classList.add('show')}
+function closeItemModal(){document.getElementById('itemOverlay').classList.remove('show')}
+function selectDrinkType(v){currentDrinkType=v;document.querySelectorAll('#drinkTypeChips .chip').forEach(c=>{c.classList.toggle('selected',c.dataset.type===v);c.classList.remove('required-empty')});document.getElementById('drinkTypeNote').style.display='none'}
+function selectContainer(v){currentContainer=v;document.querySelectorAll('#containerChips .chip').forEach(c=>{c.classList.toggle('selected',c.dataset.container===v);c.classList.remove('required-empty')});document.getElementById('containerNote').style.display='none';updateItemTotalDisplay()}
+function selectSweetness(v){currentSweetness=v;document.querySelectorAll('#sweetnessChips .chip').forEach(c=>c.classList.toggle('selected',c.dataset.s===v))}
+function toggleTopping(id){const i=currentToppings.findIndex(t=>t.id===id);if(i>=0)currentToppings.splice(i,1);else{const t=toppingsData.find(t=>t.id===id);if(t)currentToppings.push(t)}document.querySelectorAll('.topping-row').forEach(r=>r.classList.toggle('selected',currentToppings.some(t=>t.id===r.dataset.id)));updateItemTotalDisplay()}
+function changeQty(d){currentQty=Math.max(1,currentQty+d);document.getElementById('qtyNum').textContent=currentQty;updateItemTotalDisplay()}
+function calcUnitPrice(){return Number(currentItem.price)+currentToppings.reduce((s,t)=>s+Number(t.price),0)+(currentContainer==='ถุง'?10:0)}
+function updateItemTotalDisplay(){document.getElementById('itemTotalPrice').textContent=calcUnitPrice()*currentQty}
+function addSelectionToCart(){if(!currentDrinkType){document.getElementById('drinkTypeNote').style.display='block';document.querySelectorAll('#drinkTypeChips .chip').forEach(c=>c.classList.add('required-empty'));return}if(!currentContainer){document.getElementById('containerNote').style.display='block';document.querySelectorAll('#containerChips .chip').forEach(c=>c.classList.add('required-empty'));return}const unit=calcUnitPrice();cart.push({name:currentItem.name,basePrice:Number(currentItem.price),drinkType:currentDrinkType,container:currentContainer,containerExtra:currentContainer==='ถุง'?10:0,sweetness:currentSweetness,toppings:currentToppings.map(t=>({name:t.name,price:t.price})),qty:currentQty,unitPrice:unit,subtotal:unit*currentQty});closeItemModal();renderCartBar()}
+function cartTotal(){return cart.reduce((s,c)=>s+c.subtotal,0)}
+function renderCartBar(){const n=cart.reduce((s,c)=>s+c.qty,0),b=document.getElementById('cartIconBadge');b.textContent=n;b.style.display=n?'flex':'none';document.getElementById('cartBar').style.display=cart.length?'flex':'none';document.getElementById('cartCount').textContent=n;document.getElementById('cartTotal').textContent=cartTotal()}
+function openCart(){renderCartLines();document.getElementById('cartOverlay').classList.add('show')}function closeCart(){document.getElementById('cartOverlay').classList.remove('show')}
+function renderCartLines(){const e=document.getElementById('cartLines');e.innerHTML=cart.length?cart.map((c,i)=>`<div class="cart-line"><div><div class="name">${c.name} × ${c.qty}</div><div class="d">${c.drinkType} · ${c.container}${c.container==='ถุง'?' (+10 บาท)':''} · หวาน: ${c.sweetness} · ${c.toppings.length?c.toppings.map(t=>t.name).join(', '):'ไม่ใส่ท็อปปิ้ง'}</div><div class="rm" onclick="removeItem(${i})">ลบรายการนี้</div></div><div class="p">${c.subtotal} บาท</div></div>`).join(''):'<div style="text-align:center;padding:24px;color:#999">ยังไม่มีรายการในตะกร้า</div>';document.getElementById('cartModalTotal').textContent=cartTotal()}
+function removeItem(i){cart.splice(i,1);renderCartLines();renderCartBar();if(!cart.length)closeCart()}
+function onPaymentChange(){const m=document.querySelector('input[name="paymentMethod"]:checked').value;document.getElementById('slipSection').style.display=m==='โอนเงิน'?'block':'none';document.getElementById('payTransferLabel').classList.toggle('active',m==='โอนเงิน');document.getElementById('payShopLabel').classList.toggle('active',m==='ชำระที่ร้าน')}
+function onSlipSelected(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=x=>{slipBase64=x.target.result;const p=document.getElementById('slipPreview');p.src=slipBase64;p.style.display='block'};r.readAsDataURL(f)}
+async function confirmOrder(){if(!cart.length)return alert('กรุณาเลือกเมนูก่อนยืนยันคำสั่งซื้อ');const name=document.getElementById('custName').value.trim(),tel=document.getElementById('custTel').value.trim();if(!name)return alert('กรุณากรอกชื่อผู้รับ');if(!tel)return alert('กรุณากรอกเบอร์โทรศัพท์');const method=document.querySelector('input[name="paymentMethod"]:checked').value;if(method==='โอนเงิน'&&!slipBase64)return alert('กรุณาแนบสลิปการโอนเงิน');const btn=document.getElementById('confirmBtn');btn.disabled=true;btn.textContent='กำลังส่งคำสั่งซื้อ...';const items=cart.map(c=>({name:c.name,drinkType:c.drinkType,container:c.container,containerExtra:c.containerExtra,sweetness:c.sweetness,toppings:c.toppings.map(t=>t.name).join(', '),qty:c.qty,price:c.subtotal}));try{const res=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'createOrder',userId:profile.userId,name,telephone:tel,items,totalPrice:cartTotal(),paymentMethod:method,image:method==='โอนเงิน'?slipBase64:null})});const j=await res.json();if(!j.ok)throw new Error(j.error||'สั่งซื้อไม่สำเร็จ');alert('สั่งซื้อสำเร็จ! 🎉\nหมายเลขคำสั่งซื้อ: '+j.orderId);cart=[];slipBase64=null;closeCart();renderCartBar();if(liff.closeWindow)liff.closeWindow()}catch(e){alert('เกิดข้อผิดพลาด: '+e.message)}finally{btn.disabled=false;btn.textContent='ยืนยันคำสั่งซื้อ'}}
+init();
 </script>
-</body>
-</html>
+</body></html>
