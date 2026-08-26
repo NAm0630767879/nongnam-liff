@@ -15,7 +15,12 @@ header{background:linear-gradient(135deg,#6b4a35,#4a3728);color:#fff;padding:22p
 #cartIconBtn{position:relative;background:rgba(255,255,255,.15);border:0;width:42px;height:42px;border-radius:50%;font-size:20px;color:#fff}
 #cartIconBadge{position:absolute;top:-4px;right:-4px;background:var(--accent);color:#fff;font-size:11px;font-weight:800;min-width:18px;height:18px;border-radius:9px;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--brand)}
 #status{margin:14px 16px 0;padding:12px 14px;border-radius:10px;font-size:14px;line-height:1.5}.loading{background:#f1ece3;color:#6b5a48}.error{background:#fdeaea;color:var(--danger);white-space:pre-wrap}
-main{padding:16px}.section-title{font-size:15px;font-weight:700;margin:18px 0 10px}.menu-grid{display:flex;flex-direction:column;gap:10px}
+main{padding:16px}.section-title{font-size:15px;font-weight:700;margin:18px 0 10px}
+.category-tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;margin-bottom:4px;scrollbar-width:none}
+.category-tabs::-webkit-scrollbar{display:none}
+.category-tab{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:var(--brand);border-radius:20px;padding:8px 14px;font-size:13.5px;font-weight:700}
+.category-tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.menu-grid{display:flex;flex-direction:column;gap:10px}
 .menu-card{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}.menu-card img{width:64px;height:64px;object-fit:cover;border-radius:12px;background:var(--line)}.info{flex:1}.name{font-weight:700;font-size:16.5px}.price{color:var(--accent-dark);font-weight:600;font-size:14.5px;margin-top:2px}
 .add-btn{background:var(--accent);color:#fff;border:0;padding:9px 16px;border-radius:20px;font-size:14.5px;font-weight:700}.soldout{background:#eee!important;color:#888!important;cursor:not-allowed}
 #cartBar{position:fixed;left:0;right:0;bottom:0;background:var(--brand);color:#fff;padding:12px 16px;display:none;align-items:center;justify-content:space-between;box-shadow:0 -3px 12px rgba(0,0,0,.15);z-index:40}#cartBar button{background:var(--accent);color:#fff;border:0;padding:10px 20px;border-radius:22px;font-weight:700}
@@ -32,7 +37,11 @@ main{padding:16px}.section-title{font-size:15px;font-weight:700;margin:18px 0 10
 <body>
 <header><img src="logo.png" class="logo-img" alt="โลโก้ร้าน"><div class="header-text"><div class="title">ร้านน้ำชงน้องน้ำ</div><div class="sub">เลือกเมนู กดสั่งได้เลยค่ะ</div></div><button id="cartIconBtn" onclick="openCart()">🛒<span id="cartIconBadge">0</span></button></header>
 <div id="status" class="loading">กำลังโหลด...</div>
-<main id="menuSection" style="display:none"><h3 class="section-title">เมนูเครื่องดื่ม</h3><div class="menu-grid" id="menuList"></div></main>
+<main id="menuSection" style="display:none">
+  <h3 class="section-title">เมนูเครื่องดื่ม</h3>
+  <div class="category-tabs" id="categoryTabs"></div>
+  <div class="menu-grid" id="menuList"></div>
+</main>
 <div id="cartBar"><div><span id="cartCount">0</span> รายการ · <b><span id="cartTotal">0</span> บาท</b></div><button onclick="openCart()">ดูตะกร้า</button></div>
 
 <div class="overlay" id="itemOverlay"><div class="sheet">
@@ -56,13 +65,70 @@ main{padding:16px}.section-title{font-size:15px;font-weight:700;margin:18px 0 10
 const API_URL='https://script.google.com/macros/s/AKfycbyXd7Vht8MRECpCWk1XyyVmoB4JSxJFYZBiGuQS027Xq5QHoeyy4LxSIT1rl50u1_sO/exec';
 const LIFF_ID='2011058922-zZ7LXynR';
 const SWEETNESS_OPTIONS=['ปกติ','หวานน้อย','หวานมาก','ไม่หวาน'];
-const DRINK_TYPE_OPTIONS=[{value:'เย็น',label:'🧊 เย็น'},{value:'ปั่น',label:'🥤 ปั่น +5 บาท'},{value:'ร้อน',label:'🔥 ร้อน'}];
+const DRINK_TYPE_OPTIONS=[{value:'เย็น',label:'🧊 เย็น'},{value:'ปั่น',label:'🥤 ปั่น'},{value:'ร้อน',label:'🔥 ร้อน'}];
 const CONTAINER_OPTIONS=[{value:'แก้ว',label:'🥤 แก้ว'},{value:'ถุง',label:'🛍️ ถุง +5 บาท'}];
+const MENU_CATEGORIES=['ชา','นม','กาแฟ','ผลไม้','โซดา','เครื่องปั่น'];
+let selectedCategory='ทั้งหมด';
+let allMenu=[];
 let cart=[],profile=null,slipBase64=null,toppingsData=[],currentItem=null,currentDrinkType='',currentContainer='',currentSweetness=SWEETNESS_OPTIONS[0],currentToppings=[],currentQty=1;
 
 function setStatus(text,type){const e=document.getElementById('status');e.textContent=text;e.className=type||'';e.style.display=text?'block':'none'}
 async function init(){try{setStatus('กำลังเชื่อมต่อ LINE...','loading');await liff.init({liffId:LIFF_ID});if(!liff.isLoggedIn()){liff.login();return}profile=await liff.getProfile();await loadMenu()}catch(err){setStatus('เกิดข้อผิดพลาดในการเชื่อมต่อ LINE\n'+(err.message||err),'error')}}
-async function loadMenu(){try{setStatus('กำลังโหลดเมนู...','loading');const res=await fetch(API_URL+'?action=getMenu',{cache:'no-store'});const json=await res.json();if(!json.ok)throw new Error(json.error);const menu=json.data.menu||[];toppingsData=(json.data.toppings||[]).filter(t=>!t.status||t.status==='available');document.getElementById('menuList').innerHTML=menu.map(m=>{const ok=!m.status||m.status==='available';return `<div class="menu-card">${m.img?`<img src="${m.img}" alt="${m.name}" onerror="this.style.display='none'">`:''}<div class="info"><div class="name">${m.name}</div><div class="price">${m.price} บาท</div></div>${ok?`<button class="add-btn" onclick='openItemModal(${JSON.stringify(m)})'>เลือก</button>`:`<button class="add-btn soldout" disabled>หมด</button>`}</div>`}).join('');document.getElementById('menuSection').style.display='block';setStatus('','')}catch(err){setStatus('โหลดเมนูไม่สำเร็จ: '+err.message,'error')}}
+async function loadMenu(){
+  try{
+    setStatus('กำลังโหลดเมนู...','loading');
+    const res=await fetch(API_URL+'?action=getMenu',{cache:'no-store'});
+    const json=await res.json();
+    if(!json.ok) throw new Error(json.error);
+    allMenu=json.data.menu||[];
+    toppingsData=(json.data.toppings||[]).filter(t=>!t.status||t.status==='available');
+    renderCategoryTabs();
+    renderMenu();
+    document.getElementById('menuSection').style.display='block';
+    setStatus('','');
+  }catch(err){
+    setStatus('โหลดเมนูไม่สำเร็จ: '+err.message,'error');
+  }
+}
+
+function renderCategoryTabs(){
+  const el=document.getElementById('categoryTabs');
+  if(!el) return;
+  const cats=['ทั้งหมด',...MENU_CATEGORIES];
+  el.innerHTML=cats.map(c=>
+    `<button class="category-tab ${selectedCategory===c?'active':''}" onclick="selectCategory('${c}')">${c}</button>`
+  ).join('');
+}
+
+function selectCategory(category){
+  selectedCategory=category||'ทั้งหมด';
+  renderCategoryTabs();
+  renderMenu();
+}
+
+function renderMenu(){
+  const el=document.getElementById('menuList');
+  if(!el) return;
+  const visible=selectedCategory==='ทั้งหมด'
+    ? allMenu
+    : allMenu.filter(m=>(m.category||'ชา')===selectedCategory);
+
+  el.innerHTML=visible.length
+    ? visible.map(m=>{
+        const ok=!m.status||m.status==='available';
+        return `<div class="menu-card">
+          ${m.img?`<img src="${m.img}" alt="${m.name}" onerror="this.style.display='none'">`:''}
+          <div class="info">
+            <div class="name">${m.name}</div>
+            <div class="price">${m.price} บาท · ${m.category||'ชา'}</div>
+          </div>
+          ${ok
+            ? `<button class="add-btn" onclick='openItemModal(${JSON.stringify(m)})'>เลือก</button>`
+            : `<button class="add-btn soldout" disabled>หมด</button>`}
+        </div>`;
+      }).join('')
+    : `<div style="text-align:center;padding:28px;color:#999">ยังไม่มีเมนูในหมวดนี้</div>`;
+}
 
 function openItemModal(item){currentItem=item;currentDrinkType='';currentContainer='';currentSweetness=SWEETNESS_OPTIONS[0];currentToppings=[];currentQty=1;document.getElementById('mImg').src=item.img||'';document.getElementById('mImg').style.display=item.img?'block':'none';document.getElementById('mName').textContent=item.name;document.getElementById('mPrice').textContent=item.price+' บาท';
 document.getElementById('drinkTypeChips').innerHTML=DRINK_TYPE_OPTIONS.map(o=>`<div class="chip" data-type="${o.value}" onclick="selectDrinkType('${o.value}')">${o.label}</div>`).join('');
@@ -86,7 +152,7 @@ function calcUnitPrice(){
   return base+optionExtra+toppingExtra;
 }
 function updateItemTotalDisplay(){document.getElementById('itemTotalPrice').textContent=calcUnitPrice()*currentQty}
-function addSelectionToCart(){if(!currentDrinkType){document.getElementById('drinkTypeNote').style.display='block';document.querySelectorAll('#drinkTypeChips .chip').forEach(c=>c.classList.add('required-empty'));return}if(!currentContainer){document.getElementById('containerNote').style.display='block';document.querySelectorAll('#containerChips .chip').forEach(c=>c.classList.add('required-empty'));return}const unit=calcUnitPrice();cart.push({name:currentItem.name,basePrice:Number(currentItem.price),drinkType:currentDrinkType,container:currentContainer,containerExtra:currentContainer==='ถุง'?5:0,sweetness:currentSweetness,toppings:currentToppings.map(t=>({name:t.name,price:t.price})),qty:currentQty,unitPrice:unit,subtotal:unit*currentQty});closeItemModal();renderCartBar()}
+function addSelectionToCart(){if(!currentDrinkType){document.getElementById('drinkTypeNote').style.display='block';document.querySelectorAll('#drinkTypeChips .chip').forEach(c=>c.classList.add('required-empty'));return}if(!currentContainer){document.getElementById('containerNote').style.display='block';document.querySelectorAll('#containerChips .chip').forEach(c=>c.classList.add('required-empty'));return}const unit=calcUnitPrice();cart.push({id:currentItem.id||'',name:currentItem.name,category:currentItem.category||'ชา',basePrice:Number(currentItem.price),drinkType:currentDrinkType,container:currentContainer,containerExtra:currentContainer==='ถุง'?5:0,sweetness:currentSweetness,toppings:currentToppings.map(t=>({name:t.name,price:t.price})),qty:currentQty,unitPrice:unit,subtotal:unit*currentQty});closeItemModal();renderCartBar()}
 function cartTotal(){return cart.reduce((s,c)=>s+c.subtotal,0)}
 function renderCartBar(){const n=cart.reduce((s,c)=>s+c.qty,0),b=document.getElementById('cartIconBadge');b.textContent=n;b.style.display=n?'flex':'none';document.getElementById('cartBar').style.display=cart.length?'flex':'none';document.getElementById('cartCount').textContent=n;document.getElementById('cartTotal').textContent=cartTotal()}
 function openCart(){renderCartLines();document.getElementById('cartOverlay').classList.add('show')}function closeCart(){document.getElementById('cartOverlay').classList.remove('show')}
@@ -94,7 +160,7 @@ function renderCartLines(){const e=document.getElementById('cartLines');e.innerH
 function removeItem(i){cart.splice(i,1);renderCartLines();renderCartBar();if(!cart.length)closeCart()}
 function onPaymentChange(){const m=document.querySelector('input[name="paymentMethod"]:checked').value;document.getElementById('slipSection').style.display=m==='โอนเงิน'?'block':'none';document.getElementById('payTransferLabel').classList.toggle('active',m==='โอนเงิน');document.getElementById('payShopLabel').classList.toggle('active',m==='ชำระที่ร้าน')}
 function onSlipSelected(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=x=>{slipBase64=x.target.result;const p=document.getElementById('slipPreview');p.src=slipBase64;p.style.display='block'};r.readAsDataURL(f)}
-async function confirmOrder(){if(!cart.length)return alert('กรุณาเลือกเมนูก่อนยืนยันคำสั่งซื้อ');const name=document.getElementById('custName').value.trim(),tel=document.getElementById('custTel').value.trim();if(!name)return alert('กรุณากรอกชื่อผู้รับ');if(!tel)return alert('กรุณากรอกเบอร์โทรศัพท์');const method=document.querySelector('input[name="paymentMethod"]:checked').value;if(method==='โอนเงิน'&&!slipBase64)return alert('กรุณาแนบสลิปการโอนเงิน');const btn=document.getElementById('confirmBtn');btn.disabled=true;btn.textContent='กำลังส่งคำสั่งซื้อ...';const items=cart.map(c=>({name:c.name,basePrice:c.basePrice,drinkType:c.drinkType,container:c.container,containerExtra:c.containerExtra,sweetness:c.sweetness,toppings:c.toppings.map(t=>t.name).join(', '),qty:c.qty,price:c.subtotal}));try{const res=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'createOrder',userId:profile.userId,name,telephone:tel,items,totalPrice:cartTotal(),paymentMethod:method,image:method==='โอนเงิน'?slipBase64:null})});const j=await res.json();if(!j.ok)throw new Error(j.error||'สั่งซื้อไม่สำเร็จ');alert('สั่งซื้อสำเร็จ! 🎉\nหมายเลขคำสั่งซื้อ: '+j.orderId);cart=[];slipBase64=null;closeCart();renderCartBar();if(liff.closeWindow)liff.closeWindow()}catch(e){alert('เกิดข้อผิดพลาด: '+e.message)}finally{btn.disabled=false;btn.textContent='ยืนยันคำสั่งซื้อ'}}
+async function confirmOrder(){if(!cart.length)return alert('กรุณาเลือกเมนูก่อนยืนยันคำสั่งซื้อ');const name=document.getElementById('custName').value.trim(),tel=document.getElementById('custTel').value.trim();if(!name)return alert('กรุณากรอกชื่อผู้รับ');if(!tel)return alert('กรุณากรอกเบอร์โทรศัพท์');const method=document.querySelector('input[name="paymentMethod"]:checked').value;if(method==='โอนเงิน'&&!slipBase64)return alert('กรุณาแนบสลิปการโอนเงิน');const btn=document.getElementById('confirmBtn');btn.disabled=true;btn.textContent='กำลังส่งคำสั่งซื้อ...';const items=cart.map(c=>({id:c.id,name:c.name,category:c.category,basePrice:c.basePrice,drinkType:c.drinkType,container:c.container,containerExtra:c.containerExtra,sweetness:c.sweetness,toppings:c.toppings.map(t=>t.name).join(', '),qty:c.qty,price:c.subtotal}));try{const res=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'createOrder',userId:profile.userId,name,telephone:tel,items,totalPrice:cartTotal(),paymentMethod:method,image:method==='โอนเงิน'?slipBase64:null})});const j=await res.json();if(!j.ok)throw new Error(j.error||'สั่งซื้อไม่สำเร็จ');alert('สั่งซื้อสำเร็จ! 🎉\nหมายเลขคำสั่งซื้อ: '+j.orderId);cart=[];slipBase64=null;closeCart();renderCartBar();if(liff.closeWindow)liff.closeWindow()}catch(e){alert('เกิดข้อผิดพลาด: '+e.message)}finally{btn.disabled=false;btn.textContent='ยืนยันคำสั่งซื้อ'}}
 init();
 </script>
 </body></html>
