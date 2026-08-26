@@ -36,6 +36,19 @@ button{cursor:pointer}
 .page-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px;gap:10px}
 .page-head h1{font-size:24px}.page-head p{font-size:13px;color:var(--muted);margin-top:4px}
 .refresh{border:1px solid var(--line);background:#fff;padding:9px 13px;border-radius:10px}
+.date-filter{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:18px;box-shadow:var(--shadow)}
+.date-filter-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.date-filter-title{font-weight:900;font-size:14px}
+.date-filter-note{font-size:12px;color:var(--muted)}
+.quick-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.quick-row button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 11px;font-size:12px;font-weight:800;color:var(--brown)}
+.quick-row button.active{background:#f8eadb;border-color:#e5c8a8;color:var(--orange2)}
+.date-row{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;align-items:end}
+.date-field label{display:block;font-size:11px;color:var(--muted);font-weight:800;margin-bottom:5px}
+.date-field input{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:#fcfaf8}
+.date-apply{border:0;border-radius:9px;padding:10px 14px;background:var(--orange);color:#fff;font-weight:900}
+.range-label{font-size:12px;color:var(--muted);margin-top:8px}
+
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:var(--shadow)}
 .kpi .icon{font-size:22px}.kpi .num{font-size:24px;font-weight:900;margin-top:7px}.kpi .lbl{font-size:12px;color:var(--muted);margin-top:2px}
@@ -71,6 +84,8 @@ button{cursor:pointer}
 .expense-actions button{padding:6px 8px;border:1px solid var(--line);background:#fff;border-radius:7px}
 .sold-badge{display:inline-block;margin:3px;padding:5px 9px;border-radius:20px;background:#fff0f0;color:var(--red);font-size:12px;font-weight:800}
 @media(max-width:600px){.modal-grid{grid-template-columns:1fr}.modal-field.full{grid-column:auto}}
+@media(max-width:600px){.date-row{grid-template-columns:1fr 1fr}.date-apply{grid-column:1/-1;width:100%}.date-filter-head{align-items:flex-start;flex-direction:column}}
+
 </style>
 </head>
 <body>
@@ -108,9 +123,9 @@ button{cursor:pointer}
 <section id="home" class="page active">
  <div class="page-head"><div><h1>สวัสดีค่ะ 👋</h1><p id="today"></p></div><button class="refresh" onclick="loadAll()">↻ รีเฟรช</button></div>
  <div class="cards">
-  <div class="card kpi"><div class="icon">💰</div><div class="num" id="kSales">0</div><div class="lbl">ยอดขายวันนี้</div></div>
-  <div class="card kpi"><div class="icon">🧾</div><div class="num" id="kOrders">0</div><div class="lbl">ออเดอร์วันนี้</div></div>
-  <div class="card kpi"><div class="icon">🥤</div><div class="num" id="kCups">0</div><div class="lbl">จำนวนแก้ววันนี้</div></div>
+  <div class="card kpi"><div class="icon">💰</div><div class="num" id="kSales">0</div><div class="lbl" id="kSalesLabel">ยอดขาย</div></div>
+  <div class="card kpi"><div class="icon">🧾</div><div class="num" id="kOrders">0</div><div class="lbl" id="kOrdersLabel">ออเดอร์</div></div>
+  <div class="card kpi"><div class="icon">🥤</div><div class="num" id="kCups">0</div><div class="lbl" id="kCupsLabel">จำนวนแก้ว</div></div>
   <div class="card kpi"><div class="icon">🔴</div><div class="num" id="kOut">0</div><div class="lbl">สินค้าปิดการขาย</div></div>
  </div>
  <div class="grid2">
@@ -150,10 +165,23 @@ button{cursor:pointer}
 </section>
 
 <section id="reports" class="page">
- <div class="page-head"><div><h1>📊 รายงาน / สถิติ</h1><p>ภาพรวมผลการขายของร้าน</p></div></div>
+ <div class="page-head"><div><h1>📊 รายงาน / สถิติ</h1><p id="reportRangeText">เลือกช่วงเวลาเพื่อดูยอดขายและกำไร</p></div></div>
+ <div class="date-filter">
+   <div class="date-filter-head"><div class="date-filter-title">📅 เลือกเดือนหรือวันที่</div><div class="range-label" id="reportRangeLabel"></div></div>
+   <div class="quick-row">
+     <button onclick="setQuickRange('today')">วันนี้</button>
+     <button onclick="setQuickRange('thismonth')">เดือนนี้</button>
+     <button onclick="setQuickRange('lastmonth')">เดือนที่แล้ว</button>
+   </div>
+   <div class="date-row">
+     <div class="date-field"><label>วันที่เริ่ม</label><input id="reportStart" type="date"></div>
+     <div class="date-field"><label>วันที่สิ้นสุด</label><input id="reportEnd" type="date"></div>
+     <button class="date-apply" onclick="applyReportFilter()">🔎 ดูรายงาน</button>
+   </div>
+ </div>
  <div class="report-grid">
-  <div class="card report-card"><div>ยอดขายเดือนนี้</div><div class="big positive" id="rSales">0 บาท</div></div>
-  <div class="card report-card"><div>ออเดอร์เดือนนี้</div><div class="big" id="rOrders">0</div></div>
+  <div class="card report-card"><div id="rSalesLabel">ยอดขาย</div><div class="big positive" id="rSales">0 บาท</div></div>
+  <div class="card report-card"><div id="rOrdersLabel">ออเดอร์</div><div class="big" id="rOrders">0</div></div>
   <div class="card report-card"><div>ค่าเฉลี่ยต่อออเดอร์</div><div class="big" id="rAvg">0 บาท</div></div>
  </div>
  <div class="grid2" style="margin-top:16px">
@@ -175,7 +203,88 @@ let busy={home:false,orders:false,menu:false,finance:false,reports:false};
 function login(){if(document.getElementById('user').value.trim()===ADMIN_USERNAME&&document.getElementById('pass').value===ADMIN_PASSWORD){sessionStorage.setItem('nn_admin_ok','1');showApp()}else document.getElementById('error').style.display='block'}
 document.getElementById('pass').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 function logout(){sessionStorage.removeItem('nn_admin_ok');location.reload()}
-function showApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='block';loadHome()}
+let selectedStart='',selectedEnd='',selectedPreset='today',reportData=null;
+
+function localDateInput(d){
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function parseLocalDate(s){
+  if(!s)return null;
+  const [y,m,d]=s.split('-').map(Number);
+  return new Date(y,m-1,d);
+}
+function rangeText(start,end){
+  const a=parseLocalDate(start),b=parseLocalDate(end);
+  if(!a||!b)return '';
+  const fmt=d=>d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
+  return `${fmt(a)} – ${fmt(b)}`;
+}
+function setFilterInputs(start,end){
+  selectedStart=start; selectedEnd=end;
+  ['filterStart','reportStart'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=start});
+  ['filterEnd','reportEnd'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=end});
+  const t=rangeText(start,end);
+  ['selectedRangeLabel','reportRangeLabel'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=t});
+}
+function setQuickRange(type){
+  const now=new Date(); let s=new Date(now),e=new Date(now);
+  if(type==='yesterday'){s.setDate(now.getDate()-1);e=new Date(s)}
+  else if(type==='7days'){s.setDate(now.getDate()-6)}
+  else if(type==='thismonth'){s=new Date(now.getFullYear(),now.getMonth(),1);e=new Date(now.getFullYear(),now.getMonth()+1,0)}
+  else if(type==='lastmonth'){s=new Date(now.getFullYear(),now.getMonth()-1,1);e=new Date(now.getFullYear(),now.getMonth(),0)}
+  setFilterInputs(localDateInput(s),localDateInput(e));
+  selectedPreset=type;
+  document.querySelectorAll('.quick-row button').forEach(b=>b.classList.toggle('active',b.dataset.range===type));
+  applyDateFilter();
+}
+function applyDateFilter(){
+  const s=document.getElementById('filterStart')?.value,e=document.getElementById('filterEnd')?.value;
+  if(!s||!e)return toast('กรุณาเลือกวันที่เริ่มและวันที่สิ้นสุด');
+  if(s>e)return toast('วันที่เริ่มต้องไม่เกินวันที่สิ้นสุด');
+  setFilterInputs(s,e); loadSelectedReport(s,e);
+}
+function applyReportFilter(){
+  const s=document.getElementById('reportStart')?.value,e=document.getElementById('reportEnd')?.value;
+  if(!s||!e)return toast('กรุณาเลือกวันที่เริ่มและวันที่สิ้นสุด');
+  if(s>e)return toast('วันที่เริ่มต้องไม่เกินวันที่สิ้นสุด');
+  setFilterInputs(s,e); loadSelectedReport(s,e);
+}
+async function loadSelectedReport(start=selectedStart,end=selectedEnd){
+  if(!start||!end)return;
+  try{
+    setStatus('กำลังโหลดข้อมูลยอดขาย…');
+    const d=await apiGet('getReportData',{startDate:start,endDate:end});
+    reportData=d;
+    const label=rangeText(start,end);
+    document.getElementById('kSales').textContent=money(d.sales)+' บาท';
+    document.getElementById('kOrders').textContent=d.orders||0;
+    document.getElementById('kCups').textContent=d.cups||0;
+    document.getElementById('kSalesLabel').textContent='ยอดขาย · '+label;
+    document.getElementById('kOrdersLabel').textContent='ออเดอร์ · '+label;
+    document.getElementById('kCupsLabel').textContent='จำนวนแก้ว · '+label;
+    document.getElementById('rSales').textContent=money(d.sales)+' บาท';
+    document.getElementById('rOrders').textContent=d.orders||0;
+    document.getElementById('rAvg').textContent=money(d.orders?d.sales/d.orders:0)+' บาท';
+    document.getElementById('rSalesLabel').textContent='ยอดขาย · '+label;
+    document.getElementById('rOrdersLabel').textContent='ออเดอร์ · '+label;
+    document.getElementById('reportRangeText').textContent=`สรุปยอด ${label} · รายจ่าย ${money(d.expenses||0)} บาท · กำไร ${money(d.profit||0)} บาท`;
+    document.getElementById('reportRangeLabel').textContent=label;
+    document.getElementById('selectedRangeLabel').textContent=label;
+    const profitEl=document.getElementById('rAvg');
+    profitEl.title=`รายจ่าย ${money(d.expenses||0)} บาท · กำไร ${money(d.profit||0)} บาท`;
+    setStatus('');
+  }catch(e){setStatus('โหลดข้อมูลช่วงวันที่ไม่สำเร็จ: '+e.message,'error')}
+}
+function initDateFilters(){
+  const now=new Date();
+  setFilterInputs(localDateInput(now),localDateInput(now));
+  setTimeout(()=>loadSelectedReport(selectedStart,selectedEnd),0);
+}
+function loadAll(){
+  return Promise.allSettled([loadHome(true),loadOrders(true),loadMenu(true),loadFinance(true),loadReports(true)]);
+}
+function showApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='block';initDateFilters();loadHome()}
 if(sessionStorage.getItem('nn_admin_ok')==='1')showApp();
 
 async function apiGet(action,params={}){const q=new URLSearchParams({action,...params});const r=await fetch(API_URL+'?'+q.toString(),{cache:'no-store'});const j=await r.json();if(!j.ok)throw Error(j.error||'เกิดข้อผิดพลาด');return j.data}
@@ -189,7 +298,7 @@ function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&l
 function statusClass(s){return s==='รอชง'?'b-wait':s==='กำลังชง'?'b-making':s==='พร้อมรับ'?'b-ready':s==='เสร็จสิ้น'?'b-done':'b-out'}
 function itemsText(items){return (items||[]).map(i=>`${esc(i.name)} × ${i.qty||1}${i.sweetness?' ('+esc(i.sweetness)+')':''}${i.toppings?' · '+esc(Array.isArray(i.toppings)?i.toppings.join(', '):i.toppings):''}`).join(' • ')}
 
-async function loadHome(force=false){if(busy.home&&!force)return;busy.home=true;try{const d=await apiGet('getDashboardData');const t=d.today||{};document.getElementById('kSales').textContent=money(t.sales)+' บาท';document.getElementById('kOrders').textContent=t.orders||0;document.getElementById('kCups').textContent=t.cups||0;document.getElementById('kOut').textContent=d.soldOut?.count||0;const active=d.ordersNeedAction||[];document.getElementById('homeOrders').innerHTML=active.length?active.slice(0,5).map(o=>`<div class="order-mini"><div><div class="oid">${esc(o.orderId)} · ${money(o.totalPrice)} บาท</div><div class="detail">${itemsText(o.items)}</div></div><span class="badge ${statusClass(o.orderStatus)}">${esc(o.orderStatus)}</span></div>`).join(''):'<div class="empty">ไม่มีออเดอร์ที่ต้องจัดการ</div>';const out=[...(d.soldOut?.menu||[]).map(x=>'🥤 '+x.name),...(d.soldOut?.toppings||[]).map(x=>'🧋 '+x.name)];document.getElementById('homeOut').innerHTML=out.length?out.map(x=>`<span class="sold-badge">${esc(x)}</span>`).join(''):'<div style="color:#999">ทุกสินค้าพร้อมขายค่ะ ✓</div>';draw('homeChart','home','line',(d.sales7||[]).map(x=>x.label),[{label:'ยอดขาย',data:(d.sales7||[]).map(x=>x.sales)}])}catch(e){setStatus('โหลด Dashboard ไม่สำเร็จ: '+e.message,'error')}finally{busy.home=false}}
+async function loadHome(force=false){if(busy.home&&!force)return;busy.home=true;try{const d=await apiGet('getDashboardData');document.getElementById('kOut').textContent=d.soldOut?.count||0;const active=d.ordersNeedAction||[];document.getElementById('homeOrders').innerHTML=active.length?active.slice(0,5).map(o=>`<div class="order-mini"><div><div class="oid">${esc(o.orderId)} · ${money(o.totalPrice)} บาท</div><div class="detail">${itemsText(o.items)}</div></div><span class="badge ${statusClass(o.orderStatus)}">${esc(o.orderStatus)}</span></div>`).join(''):'<div class="empty">ไม่มีออเดอร์ที่ต้องจัดการ</div>';const out=[...(d.soldOut?.menu||[]).map(x=>'🥤 '+x.name),...(d.soldOut?.toppings||[]).map(x=>'🧋 '+x.name)];document.getElementById('homeOut').innerHTML=out.length?out.map(x=>`<span class="sold-badge">${esc(x)}</span>`).join(''):'<div style="color:#999">ทุกสินค้าพร้อมขายค่ะ ✓</div>';draw('homeChart','home','line',(d.sales7||[]).map(x=>x.label),[{label:'ยอดขาย',data:(d.sales7||[]).map(x=>x.sales)}]);if(selectedStart&&selectedEnd)loadSelectedReport(selectedStart,selectedEnd)}catch(e){setStatus('โหลด Dashboard ไม่สำเร็จ: '+e.message,'error')}finally{busy.home=false}}
 async function loadOrders(force=false){if(busy.orders&&!force)return;busy.orders=true;try{allOrders=await apiGet('getAllOrders');renderOrders()}catch(e){setStatus('โหลดออเดอร์ไม่สำเร็จ: '+e.message,'error')}finally{busy.orders=false}}
 function renderOrders(){const q=(document.getElementById('orderSearch')?.value||'').toLowerCase(),f=document.getElementById('orderFilter')?.value||'all';const arr=allOrders.filter(o=>(f==='all'||o.orderStatus===f)&&(`${o.orderId} ${o.customerName||''} ${o.telephone||''}`).toLowerCase().includes(q));document.getElementById('orderList').innerHTML=arr.length?arr.map(o=>`<div class="order-card"><div class="order-top"><div><div class="order-id">${esc(o.orderId)}</div><div class="time">${o.timestamp?new Date(o.timestamp).toLocaleString('th-TH'):''}</div></div><div class="price">${money(o.totalPrice)} บาท</div></div><div class="order-info">👤 ${esc(o.customerName||'-')} · ${esc(o.telephone||'-')}<br>🥤 ${itemsText(o.items)}<br><span class="badge ${statusClass(o.orderStatus)}" style="display:inline-block;margin:5px 0 0">${esc(o.orderStatus)}</span> <span class="badge" style="display:inline-block;background:#f1eee9;color:#6b5a4c">${esc(o.paymentStatus||'-')}</span></div><div class="actions"><button onclick="viewOrder('${esc(o.orderId)}')">ดูรายละเอียด</button><select class="status-select" onchange="updateOrderStatus('${esc(o.orderId)}',this.value)"><option value="">สถานะออเดอร์</option>${['รอชง','กำลังชง','พร้อมรับ','เสร็จสิ้น'].map(s=>`<option ${s===o.orderStatus?'selected':''}>${s}</option>`).join('')}</select><select class="status-select" onchange="updatePaymentStatus('${esc(o.orderId)}',this.value)"><option value="">การชำระเงิน</option>${['รอตรวจสอบสลิป','ชำระเงินแล้ว','รอชำระที่ร้าน','ยกเลิก'].map(s=>`<option ${s===o.paymentStatus?'selected':''}>${s}</option>`).join('')}</select>${o.slipUrl?`<a href="${esc(o.slipUrl)}" target="_blank">🧾 ดูสลิป</a>`:''}</div></div>`).join(''):'<div class="empty">ไม่พบออเดอร์</div>'}
 function viewOrder(id){const o=allOrders.find(x=>String(x.orderId)===String(id));if(!o)return;openModal(`<h3>🧾 รายละเอียดออเดอร์</h3><div class="order-detail"><b>${esc(o.orderId)}</b><hr>ลูกค้า: ${esc(o.customerName||'-')}<br>โทร: ${esc(o.telephone||'-')}<br>เวลา: ${o.timestamp?new Date(o.timestamp).toLocaleString('th-TH'):'-'}<br>การชำระเงิน: ${esc(o.paymentStatus||'-')}<br>สถานะออเดอร์: ${esc(o.orderStatus||'-')}<hr>${itemsText(o.items)}<hr><b>รวม ${money(o.totalPrice)} บาท</b></div><div class="modal-actions"><button class="btn2" onclick="closeModal()">ปิด</button></div>`)}
@@ -214,7 +323,7 @@ function openExpenseModal(id=''){const x=id?allExpenses.find(e=>String(e.id)===S
 async function saveExpense(id){const date=document.getElementById('eDate').value,amount=Number(document.getElementById('eAmount').value),note=document.getElementById('eNote').value.trim();if(!date||!amount||amount<=0)return toast('กรุณากรอกข้อมูลให้ครบ');try{if(id)await apiPost({action:'updateExpense',id,date,amount,note});else await apiPost({action:'addExpense',date,amount,note});closeModal();await loadFinance(true);toast(id?'แก้ไขรายจ่ายแล้ว':'บันทึกรายจ่ายแล้ว')}catch(e){toast('บันทึกรายจ่ายไม่สำเร็จ: '+e.message)}}
 async function deleteExpense(id){const x=allExpenses.find(e=>String(e.id)===String(id));if(!x||!confirm(`ลบรายการ "${x.note||'รายจ่าย'}" ใช่หรือไม่?`))return;try{await apiPost({action:'deleteExpense',id});allExpenses=allExpenses.filter(e=>String(e.id)!==String(id));renderFinance();toast('ลบรายจ่ายแล้ว')}catch(e){toast('ลบไม่สำเร็จ: '+e.message)}}
 
-async function loadReports(force=false){if(busy.reports&&!force)return;busy.reports=true;try{const d=await apiGet('getReportData');document.getElementById('rSales').textContent=money(d.sales)+' บาท';document.getElementById('rOrders').textContent=d.orders||0;document.getElementById('rAvg').textContent=money(d.orders?d.sales/d.orders:0)+' บาท';document.getElementById('bestMenu').innerHTML=(d.bestMenu||[]).length?d.bestMenu.map((x,i)=>`<div class="order-mini"><b>${i+1}. ${esc(x.name)}</b><span class="badge b-ready">${x.qty} แก้ว</span></div>`).join(''):'<div class="empty">ยังไม่มีข้อมูล</div>';draw('reportChart','report','bar',(d.sixMonths||[]).map(x=>x.label),[{label:'ยอดขาย',data:(d.sixMonths||[]).map(x=>x.sales)}])}catch(e){setStatus('โหลดรายงานไม่สำเร็จ: '+e.message,'error')}finally{busy.reports=false}}
+async function loadReports(force=false){if(busy.reports&&!force)return;busy.reports=true;try{if(!selectedStart||!selectedEnd)initDateFilters();else await loadSelectedReport(selectedStart,selectedEnd);document.getElementById('bestMenu').innerHTML='<div class="empty">เลือกช่วงวันที่ด้านบนเพื่อดูยอดขายและกำไร</div>';draw('reportChart','report','bar',[rangeText(selectedStart,selectedEnd)||'ช่วงที่เลือก'],[{label:'ยอดขาย',data:[reportData?.sales||0]}])}catch(e){setStatus('โหลดรายงานไม่สำเร็จ: '+e.message,'error')}finally{busy.reports=false}}
 function draw(id,key,type,labels,datasets){if(charts[key])charts[key].destroy();const el=document.getElementById(id);if(!el)return;charts[key]=new Chart(el,{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}})}
 function openModal(html){document.getElementById('modalBox').innerHTML=html;document.getElementById('modalBg').classList.add('show')}
 function closeModal(){document.getElementById('modalBg').classList.remove('show');document.getElementById('modalBox').innerHTML=''}
