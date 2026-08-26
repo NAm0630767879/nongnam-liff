@@ -21,16 +21,7 @@ main{padding:16px}.section-title{font-size:15px;font-weight:700;margin:18px 0 10
 #cartBar{position:fixed;left:0;right:0;bottom:0;background:var(--brand);color:#fff;padding:12px 16px;display:none;align-items:center;justify-content:space-between;box-shadow:0 -3px 12px rgba(0,0,0,.15);z-index:40}#cartBar button{background:var(--accent);color:#fff;border:0;padding:10px 20px;border-radius:22px;font-weight:700}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:50}.overlay.show{display:flex}.sheet{background:#fff;width:100%;max-height:92vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:18px}
 .sheet-head{display:flex;gap:12px;align-items:center;margin-bottom:12px}.sheet-head img{width:60px;height:60px;border-radius:12px;object-fit:cover;background:var(--line)}.close-x{margin-left:auto;background:none;border:0;font-size:20px;color:#999}
-.option-group{margin:16px 0}.option-label{font-weight:700;font-size:14px;margin-bottom:8px}
-.pricing-note{margin:12px 0 16px;padding:12px 14px;background:#fff8ed;border:1px solid #efd9bd;border-radius:12px;color:#6b4a35;font-size:13px;line-height:1.7}
-.pricing-note-title{font-weight:800;margin-bottom:6px;font-size:15px}
-.pricing-note-main{display:grid;gap:3px}
-.pricing-example{margin-top:9px;padding-top:8px;border-top:1px dashed #e5c9a6}
-.pricing-example-title{font-weight:800;margin-bottom:3px}
-.pricing-note strong{color:#a86f36}
-.price-breakdown{margin:8px 0 4px;padding:10px 12px;border-radius:10px;background:#fffdf9;border:1px solid #ead8c3;color:#6b4a35;font-size:13px;line-height:1.6;display:none}
-.price-breakdown.show{display:block}
-.chip-row{display:flex;flex-wrap:wrap;gap:8px}.chip{border:1.5px solid var(--line);background:#fff;border-radius:20px;padding:9px 15px;font-size:14.5px;cursor:pointer;user-select:none}.chip.selected{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}.chip.required-empty{border-color:var(--danger);color:var(--danger);background:#fff8f8}.required-note{color:var(--danger);font-size:12.5px;margin-top:5px}
+.option-group{margin:16px 0}.option-label{font-weight:700;font-size:14px;margin-bottom:8px}.chip-row{display:flex;flex-wrap:wrap;gap:8px}.chip{border:1.5px solid var(--line);background:#fff;border-radius:20px;padding:9px 15px;font-size:14.5px;cursor:pointer;user-select:none}.chip.selected{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}.chip.required-empty{border-color:var(--danger);color:var(--danger);background:#fff8f8}.required-note{color:var(--danger);font-size:12.5px;margin-top:5px}
 .topping-row{display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer}.topping-row.selected{border-color:var(--accent);background:#fdf3e8}.t-name{font-size:15px;font-weight:600}.t-price{font-size:13.5px;color:var(--brand-light)}.check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--line)}
 .qty-row{display:flex;align-items:center;justify-content:center;gap:18px;margin:18px 0 4px}.qty-btn{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line);background:#fff;font-size:18px;font-weight:700}.qty-num{font-size:18px;font-weight:700;min-width:24px;text-align:center}
 .sheet-add-btn,#confirmBtn{width:100%;padding:14px;margin-top:14px;background:var(--accent);color:#fff;border:0;border-radius:14px;font-size:15.5px;font-weight:700}
@@ -41,23 +32,14 @@ main{padding:16px}.section-title{font-size:15px;font-weight:700;margin:18px 0 10
 <body>
 <header><img src="logo.png" class="logo-img" alt="โลโก้ร้าน"><div class="header-text"><div class="title">ร้านน้ำชงน้องน้ำ</div><div class="sub">เลือกเมนู กดสั่งได้เลยค่ะ</div></div><button id="cartIconBtn" onclick="openCart()">🛒<span id="cartIconBadge">0</span></button></header>
 <div id="status" class="loading">กำลังโหลด...</div>
-<main id="menuSection" style="display:none"><h3 class="section-title">เมนูเครื่องดื่ม</h3><div class="menu-grid" id="menuList"></div></main>
+<main id="menuSection" style="display:none"><h3 class="section-title">เมนูเครื่องดื่ม</h3>
+<div class="pricing-note" style="margin:10px 0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fffdf9;color:var(--brand-light);font-size:13px;line-height:1.55">💡 <strong style="color:var(--accent-dark)">ค่าปั่น +5 บาท</strong> สำหรับเมนูทั่วไป ส่วนเมนูเครื่องปั่นราคาที่แสดง <strong style="color:var(--accent-dark)">รวมค่าปั่นแล้ว</strong> เลือกแก้วหรือถุงได้ <strong style="color:var(--accent-dark)">ไม่คิดเพิ่ม</strong></div><div class="menu-grid" id="menuList"></div></main>
 <div id="cartBar"><div><span id="cartCount">0</span> รายการ · <b><span id="cartTotal">0</span> บาท</b></div><button onclick="openCart()">ดูตะกร้า</button></div>
 
 <div class="overlay" id="itemOverlay"><div class="sheet">
 <div class="sheet-head"><img id="mImg"><div><div class="name" id="mName"></div><div class="price" id="mPrice"></div></div><button class="close-x" onclick="closeItemModal()">✕</button></div>
-<div class="pricing-note">
-  💡 <strong>ค่าปั่น +5 บาท</strong> | เลือกแก้วหรือถุงได้ โดยถุงไม่คิดเพิ่ม
-</div>
-  <div class="pricing-example">
-    <div class="pricing-example-title">ตัวอย่าง</div>
-    <div>ชาไทย 30 บาท → แก้วเย็น 30 บาท · ถุงเย็น 35 บาท · แก้วปั่น 35 บาท · ถุงปั่น <strong>35 บาท</strong></div>
-    <div>โอริโอ้ปั่น 35 บาท → แก้ว 35 บาท · ถุง <strong>40 บาท</strong></div>
-  </div>
-</div>
-<div class="price-breakdown" id="priceBreakdown"></div>
-<div class="option-group" id="drinkTypeGroup"><div class="option-label">รูปแบบเครื่องดื่ม <span style="color:#c94b4b">*</span></div><div class="chip-row" id="drinkTypeChips"></div><div class="required-note" id="drinkTypeNote" style="display:none">กรุณาเลือก ปั่น / เย็น / ร้อน</div></div>
-<div class="option-group" id="containerGroup"><div class="option-label">บรรจุภัณฑ์ <span style="color:#c94b4b">*</span></div><div class="chip-row" id="containerChips"></div><div class="required-note" id="containerNote" style="display:none">กรุณาเลือก แก้ว หรือ ถุง</div></div>
+<div class="option-group"><div class="option-label">รูปแบบเครื่องดื่ม <span style="color:#c94b4b">*</span></div><div class="chip-row" id="drinkTypeChips"></div><div class="required-note" id="drinkTypeNote" style="display:none">กรุณาเลือก ปั่น / เย็น / ร้อน</div></div>
+<div class="option-group"><div class="option-label">บรรจุภัณฑ์ <span style="color:#c94b4b">*</span></div><div class="chip-row" id="containerChips"></div><div class="required-note" id="containerNote" style="display:none">กรุณาเลือก แก้ว หรือ ถุง</div></div>
 <div class="option-group"><div class="option-label">ระดับความหวาน</div><div class="chip-row" id="sweetnessChips"></div></div>
 <div class="option-group" id="toppingGroup"><div class="option-label">ท็อปปิ้ง (เลือกได้หลายอย่าง)</div><div id="toppingList"></div></div>
 <div class="option-group"><div class="option-label">จำนวน</div><div class="qty-row"><button class="qty-btn" onclick="changeQty(-1)">−</button><div class="qty-num" id="qtyNum">1</div><button class="qty-btn" onclick="changeQty(1)">+</button></div></div>
@@ -76,70 +58,63 @@ const API_URL='https://script.google.com/macros/s/AKfycbyXd7Vht8MRECpCWk1XyyVmoB
 const LIFF_ID='2011058922-zZ7LXynR';
 const SWEETNESS_OPTIONS=['ปกติ','หวานน้อย','หวานมาก','ไม่หวาน'];
 const DRINK_TYPE_OPTIONS=[{value:'เย็น',label:'🧊 เย็น'},{value:'ปั่น',label:'🥤 ปั่น'},{value:'ร้อน',label:'🔥 ร้อน'}];
-const CONTAINER_OPTIONS=[{value:'แก้ว',label:'🥤 แก้ว'},{value:'ถุง',label:'🛍️ ถุง +5 บาท'}];
-function isBlenderItem(item){return String(item&&item.category||'').trim()==='เครื่องปั่น';}
+const CONTAINER_OPTIONS=[{value:'แก้ว',label:'🥤 แก้ว'},{value:'ถุง',label:'🛍️ ถุง'}];
 let cart=[],profile=null,slipBase64=null,toppingsData=[],currentItem=null,currentDrinkType='',currentContainer='',currentSweetness=SWEETNESS_OPTIONS[0],currentToppings=[],currentQty=1;
 
 function setStatus(text,type){const e=document.getElementById('status');e.textContent=text;e.className=type||'';e.style.display=text?'block':'none'}
 async function init(){try{setStatus('กำลังเชื่อมต่อ LINE...','loading');await liff.init({liffId:LIFF_ID});if(!liff.isLoggedIn()){liff.login();return}profile=await liff.getProfile();await loadMenu()}catch(err){setStatus('เกิดข้อผิดพลาดในการเชื่อมต่อ LINE\n'+(err.message||err),'error')}}
 async function loadMenu(){try{setStatus('กำลังโหลดเมนู...','loading');const res=await fetch(API_URL+'?action=getMenu',{cache:'no-store'});const json=await res.json();if(!json.ok)throw new Error(json.error);const menu=json.data.menu||[];toppingsData=(json.data.toppings||[]).filter(t=>!t.status||t.status==='available');document.getElementById('menuList').innerHTML=menu.map(m=>{const ok=!m.status||m.status==='available';return `<div class="menu-card">${m.img?`<img src="${m.img}" alt="${m.name}" onerror="this.style.display='none'">`:''}<div class="info"><div class="name">${m.name}</div><div class="price">${m.price} บาท</div></div>${ok?`<button class="add-btn" onclick='openItemModal(${JSON.stringify(m)})'>เลือก</button>`:`<button class="add-btn soldout" disabled>หมด</button>`}</div>`}).join('');document.getElementById('menuSection').style.display='block';setStatus('','')}catch(err){setStatus('โหลดเมนูไม่สำเร็จ: '+err.message,'error')}}
 
-function openItemModal(item){currentItem=item;const blender=isBlenderItem(item);currentDrinkType=blender?'เครื่องปั่น':'';currentContainer='';currentSweetness=SWEETNESS_OPTIONS[0];currentToppings=[];currentQty=1;document.getElementById('mImg').src=item.img||'';document.getElementById('mImg').style.display=item.img?'block':'none';document.getElementById('mName').textContent=item.name;document.getElementById('mPrice').textContent=item.price+' บาท';
-const drinkGroup=document.getElementById('drinkTypeGroup');const containerGroup=document.getElementById('containerGroup');
-drinkGroup.style.display=blender?'none':'block';containerGroup.style.display='block';
-document.getElementById('drinkTypeChips').innerHTML=DRINK_TYPE_OPTIONS.map(o=>`<div class="chip" data-type="${o.value}" onclick="selectDrinkType('${o.value}')">${o.label}</div>`).join('');
-document.getElementById('containerChips').innerHTML=CONTAINER_OPTIONS.map(o=>{const label=o.value==='ถุง'?'🛍️ ถุง +5 บาท':o.label;return `<div class="chip" data-container="${o.value}" onclick="selectContainer('${o.value}')">${label}</div>`}).join('');
-document.getElementById('drinkTypeNote').style.display='none';document.getElementById('containerNote').style.display='none';
-document.getElementById('sweetnessChips').innerHTML=SWEETNESS_OPTIONS.map(s=>`<div class="chip ${s===currentSweetness?'selected':''}" data-s="${s}" onclick="selectSweetness('${s}')">${s}</div>`).join('');
-const tg=document.getElementById('toppingGroup');tg.style.display=toppingsData.length?'block':'none';if(toppingsData.length)document.getElementById('toppingList').innerHTML=toppingsData.map(t=>`<div class="topping-row" data-id="${t.id}" onclick="toggleTopping('${t.id}')"><div><div class="t-name">${t.name}</div><div class="t-price">+${t.price} บาท</div></div><div class="check"></div></div>`).join('');
-document.getElementById('qtyNum').textContent=1;document.getElementById('priceBreakdown').classList.remove('show');updateItemTotalDisplay();document.getElementById('itemOverlay').classList.add('show')}
+function isBlenderItem(item){
+  const c=String(item?.category||'').trim().toLowerCase();
+  return ['เครื่องปั่น','เครื่องปั่นเฉพาะ','เมนูเครื่องปั่น','ปั่นเฉพาะ','blender'].includes(c);
+}
+function openItemModal(item){
+  currentItem=item;currentDrinkType='';currentContainer='';currentSweetness=SWEETNESS_OPTIONS[0];currentToppings=[];currentQty=1;
+  const blender=isBlenderItem(item);
+  document.getElementById('mImg').src=item.img||'';document.getElementById('mImg').style.display=item.img?'block':'none';
+  document.getElementById('mName').textContent=item.name;document.getElementById('mPrice').textContent=item.price+' บาท';
+  const drinkGroup=document.getElementById('drinkTypeChips').closest('.option-group');drinkGroup.style.display=blender?'none':'block';
+  document.getElementById('drinkTypeChips').innerHTML=DRINK_TYPE_OPTIONS.map(o=>`<div class="chip" data-type="${o.value}" onclick="selectDrinkType('${o.value}')">${o.label}</div>`).join('');
+  document.getElementById('containerChips').innerHTML=CONTAINER_OPTIONS.map(o=>`<div class="chip" data-container="${o.value}" onclick="selectContainer('${o.value}')">${o.label}</div>`).join('');
+  document.getElementById('sweetnessChips').innerHTML=SWEETNESS_OPTIONS.map(s=>`<div class="chip ${s===currentSweetness?'selected':''}" data-s="${s}" onclick="selectSweetness('${s}')">${s}</div>`).join('');
+  const tg=document.getElementById('toppingGroup');tg.style.display=toppingsData.length?'block':'none';
+  if(toppingsData.length)document.getElementById('toppingList').innerHTML=toppingsData.map(t=>`<div class="topping-row" data-id="${t.id}" onclick="toggleTopping('${t.id}')"><div><div class="t-name">${t.name}</div><div class="t-price">+${t.price} บาท</div></div><div class="check"></div></div>`).join('');
+  document.getElementById('drinkTypeNote').style.display='none';document.getElementById('containerNote').style.display='none';
+  document.getElementById('qtyNum').textContent=1;updateItemTotalDisplay();document.getElementById('itemOverlay').classList.add('show');
+}
 function closeItemModal(){document.getElementById('itemOverlay').classList.remove('show')}
 function selectDrinkType(v){currentDrinkType=v;document.querySelectorAll('#drinkTypeChips .chip').forEach(c=>{c.classList.toggle('selected',c.dataset.type===v);c.classList.remove('required-empty')});document.getElementById('drinkTypeNote').style.display='none';updateItemTotalDisplay()}
 function selectContainer(v){currentContainer=v;document.querySelectorAll('#containerChips .chip').forEach(c=>{c.classList.toggle('selected',c.dataset.container===v);c.classList.remove('required-empty')});document.getElementById('containerNote').style.display='none';updateItemTotalDisplay()}
 function selectSweetness(v){currentSweetness=v;document.querySelectorAll('#sweetnessChips .chip').forEach(c=>c.classList.toggle('selected',c.dataset.s===v))}
 function toggleTopping(id){const i=currentToppings.findIndex(t=>t.id===id);if(i>=0)currentToppings.splice(i,1);else{const t=toppingsData.find(t=>t.id===id);if(t)currentToppings.push(t)}document.querySelectorAll('.topping-row').forEach(r=>r.classList.toggle('selected',currentToppings.some(t=>t.id===r.dataset.id)));updateItemTotalDisplay()}
 function changeQty(d){currentQty=Math.max(1,currentQty+d);document.getElementById('qtyNum').textContent=currentQty;updateItemTotalDisplay()}
-function calcUnitPrice(){const blender=isBlenderItem(currentItem);const drinkExtra=!blender&&currentDrinkType==='ปั่น'?5:0;const containerExtra=currentContainer==='ถุง'?5:0;const optionExtra=Math.max(drinkExtra,containerExtra);return Number(currentItem.price)+optionExtra+currentToppings.reduce((s,t)=>s+Number(t.price),0)}
-function updateItemTotalDisplay(){
-  const unit=calcUnitPrice();
-  document.getElementById('itemTotalPrice').textContent=unit*currentQty;
-  const box=document.getElementById('priceBreakdown');
-  if(!box||!currentItem)return;
-  const blender=isBlenderItem(currentItem);
-  const base=Number(currentItem.price)||0;
-  const drinkExtra=(!blender&&currentDrinkType==='ปั่น')?5:0;
-  const containerExtra=(currentContainer==='ถุง')?5:0;
-  const optionExtra=Math.max(drinkExtra,containerExtra);
-  const toppingExtra=currentToppings.reduce((s,t)=>s+(Number(t.price)||0),0);
-  const parts=['ราคาเมนู '+base+' บาท'];
-  if(blender){
-    parts.push('เมนูเครื่องปั่นคิดราคาปั่นรวมในราคาแล้ว');
-  }else if(currentDrinkType==='ปั่น'){
-    parts.push('ค่าปั่น +5 บาท');
-  }else if(currentDrinkType){
-    parts.push(currentDrinkType+' ไม่เพิ่มค่าปั่น');
-  }
-  if(currentContainer==='ถุง'){
-    parts.push('ค่าถุง +5 บาท');
-  }else if(currentContainer==='แก้ว'){
-    parts.push('แก้ว ไม่เพิ่มค่าบรรจุภัณฑ์');
-  }
-  if(drinkExtra&&containerExtra){
-    parts.push('ปั่น + ถุง คิดเพิ่มรวม +5 บาทครั้งเดียว');
-  }
-  if(toppingExtra>0)parts.push('ท็อปปิ้ง +'+toppingExtra+' บาท');
-  box.innerHTML='<strong>💡 ราคาที่เลือกตอนนี้</strong><br>'+parts.join(' · ')+'<br><strong>รวม '+unit+' บาท/แก้ว</strong> × '+currentQty+' = <strong>'+(unit*currentQty)+' บาท</strong>';
-  box.classList.add('show');
+function calcUnitPrice(){
+  const blender=isBlenderItem(currentItem),toppingExtra=currentToppings.reduce((s,t)=>s+Number(t.price||0),0);
+  if(blender)return Number(currentItem.price||0)+toppingExtra;
+  return Number(currentItem.price||0)+Math.max(currentDrinkType==='ปั่น'?5:0,currentContainer==='ถุง'?5:0)+toppingExtra;
 }
-function addSelectionToCart(){const blender=isBlenderItem(currentItem);if(!blender&&!currentDrinkType){document.getElementById('drinkTypeNote').style.display='block';document.querySelectorAll('#drinkTypeChips .chip').forEach(c=>c.classList.add('required-empty'));return}if(!blender&&!currentContainer){document.getElementById('containerNote').style.display='block';document.querySelectorAll('#containerChips .chip').forEach(c=>c.classList.add('required-empty'));return}const unit=calcUnitPrice();const drinkExtra=(!blender&&currentDrinkType==='ปั่น')?5:0;const containerExtra=(currentContainer==='ถุง')?5:0;cart.push({id:currentItem.id,name:currentItem.name,category:currentItem.category||'',basePrice:Number(currentItem.price),drinkType:blender?'เครื่องปั่น':currentDrinkType,container:currentContainer,containerExtra:containerExtra,drinkExtra:drinkExtra,sweetness:currentSweetness,toppings:currentToppings.map(t=>({name:t.name,price:t.price})),qty:currentQty,unitPrice:unit,subtotal:unit*currentQty});closeItemModal();renderCartBar()}
+function updateItemTotalDisplay(){document.getElementById('itemTotalPrice').textContent=calcUnitPrice()*currentQty}
+function addSelectionToCart(){
+  const blender=isBlenderItem(currentItem);
+  if(!blender&&!currentDrinkType){document.getElementById('drinkTypeNote').style.display='block';document.querySelectorAll('#drinkTypeChips .chip').forEach(c=>c.classList.add('required-empty'));return}
+  if(!currentContainer){document.getElementById('containerNote').style.display='block';document.querySelectorAll('#containerChips .chip').forEach(c=>c.classList.add('required-empty'));return}
+  const unit=calcUnitPrice();
+  cart.push({id:currentItem.id,name:currentItem.name,category:currentItem.category||'',basePrice:Number(currentItem.price),drinkType:blender?'ปั่น':currentDrinkType,container:currentContainer,containerExtra:blender?0:(currentContainer==='ถุง'?5:0),sweetness:currentSweetness,toppings:currentToppings.map(t=>({name:t.name,price:t.price})),qty:currentQty,unitPrice:unit,subtotal:unit*currentQty});
+  closeItemModal();renderCartBar();
+}
 function cartTotal(){return cart.reduce((s,c)=>s+c.subtotal,0)}
 function renderCartBar(){const n=cart.reduce((s,c)=>s+c.qty,0),b=document.getElementById('cartIconBadge');b.textContent=n;b.style.display=n?'flex':'none';document.getElementById('cartBar').style.display=cart.length?'flex':'none';document.getElementById('cartCount').textContent=n;document.getElementById('cartTotal').textContent=cartTotal()}
 function openCart(){renderCartLines();document.getElementById('cartOverlay').classList.add('show')}function closeCart(){document.getElementById('cartOverlay').classList.remove('show')}
-function renderCartLines(){const e=document.getElementById('cartLines');e.innerHTML=cart.length?cart.map((c,i)=>{const detail=c.category==='เครื่องปั่น'?'🌀 เครื่องปั่น':' '+c.drinkType+' · '+c.container+(c.container==='ถุง'?' (+5 บาท)':'');return `<div class="cart-line"><div><div class="name">${c.name} × ${c.qty}</div><div class="d">${detail} · หวาน: ${c.sweetness} · ${c.toppings.length?c.toppings.map(t=>t.name).join(', '):'ไม่ใส่ท็อปปิ้ง'}</div><div class="rm" onclick="removeItem(${i})">ลบรายการนี้</div></div><div class="p">${c.subtotal} บาท</div></div>`}).join(''):'<div style="text-align:center;padding:24px;color:#999">ยังไม่มีรายการในตะกร้า</div>';document.getElementById('cartModalTotal').textContent=cartTotal()}
+function renderCartLines(){
+  const e=document.getElementById('cartLines');
+  e.innerHTML=cart.length?cart.map((c,i)=>{const blender=isBlenderItem(c);const detail=[blender?'ปั่น':c.drinkType,c.container];if(c.container==='ถุง'&&!blender&&Number(c.containerExtra||0)>0)detail.push('+5 บาท');detail.push('หวาน: '+c.sweetness);detail.push(c.toppings.length?c.toppings.map(t=>t.name).join(', '):'ไม่ใส่ท็อปปิ้ง');return `<div class="cart-line"><div><div class="name">${c.name} × ${c.qty}</div><div class="d">${detail.join(' · ')}</div><div class="rm" onclick="removeItem(${i})">ลบรายการนี้</div></div><div class="p">${c.subtotal} บาท</div></div>`}).join(''):'<div style="text-align:center;padding:24px;color:#999">ยังไม่มีรายการในตะกร้า</div>';
+  document.getElementById('cartModalTotal').textContent=cartTotal()
+}
 function removeItem(i){cart.splice(i,1);renderCartLines();renderCartBar();if(!cart.length)closeCart()}
 function onPaymentChange(){const m=document.querySelector('input[name="paymentMethod"]:checked').value;document.getElementById('slipSection').style.display=m==='โอนเงิน'?'block':'none';document.getElementById('payTransferLabel').classList.toggle('active',m==='โอนเงิน');document.getElementById('payShopLabel').classList.toggle('active',m==='ชำระที่ร้าน')}
 function onSlipSelected(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=x=>{slipBase64=x.target.result;const p=document.getElementById('slipPreview');p.src=slipBase64;p.style.display='block'};r.readAsDataURL(f)}
-async function confirmOrder(){if(!cart.length)return alert('กรุณาเลือกเมนูก่อนยืนยันคำสั่งซื้อ');const name=document.getElementById('custName').value.trim(),tel=document.getElementById('custTel').value.trim();if(!name)return alert('กรุณากรอกชื่อผู้รับ');if(!tel)return alert('กรุณากรอกเบอร์โทรศัพท์');const method=document.querySelector('input[name="paymentMethod"]:checked').value;if(method==='โอนเงิน'&&!slipBase64)return alert('กรุณาแนบสลิปการโอนเงิน');const btn=document.getElementById('confirmBtn');btn.disabled=true;btn.textContent='กำลังส่งคำสั่งซื้อ...';const items=cart.map(c=>({id:c.id,name:c.name,category:c.category,basePrice:c.basePrice,drinkType:c.drinkType,container:c.container,containerExtra:c.containerExtra,drinkExtra:c.drinkExtra,sweetness:c.sweetness,toppings:c.toppings.map(t=>t.name).join(', '),qty:c.qty,unitPrice:c.unitPrice,subtotal:c.subtotal,price:c.subtotal}));try{const res=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'createOrder',userId:profile.userId,name,telephone:tel,items,totalPrice:cartTotal(),paymentMethod:method,image:method==='โอนเงิน'?slipBase64:null})});const j=await res.json();if(!j.ok)throw new Error(j.error||'สั่งซื้อไม่สำเร็จ');alert('สั่งซื้อสำเร็จ! 🎉\nหมายเลขคำสั่งซื้อ: '+j.orderId);cart=[];slipBase64=null;closeCart();renderCartBar();if(liff.closeWindow)liff.closeWindow()}catch(e){alert('เกิดข้อผิดพลาด: '+e.message)}finally{btn.disabled=false;btn.textContent='ยืนยันคำสั่งซื้อ'}}
+async function confirmOrder(){if(!cart.length)return alert('กรุณาเลือกเมนูก่อนยืนยันคำสั่งซื้อ');const name=document.getElementById('custName').value.trim(),tel=document.getElementById('custTel').value.trim();if(!name)return alert('กรุณากรอกชื่อผู้รับ');if(!tel)return alert('กรุณากรอกเบอร์โทรศัพท์');const method=document.querySelector('input[name="paymentMethod"]:checked').value;if(method==='โอนเงิน'&&!slipBase64)return alert('กรุณาแนบสลิปการโอนเงิน');const btn=document.getElementById('confirmBtn');btn.disabled=true;btn.textContent='กำลังส่งคำสั่งซื้อ...';const items=cart.map(c=>({id:c.id,name:c.name,category:c.category,basePrice:c.basePrice,drinkType:c.drinkType,container:c.container,containerExtra:c.containerExtra,sweetness:c.sweetness,toppings:c.toppings.map(t=>t.name).join(', '),qty:c.qty,price:c.unitPrice,subtotal:c.subtotal}));try{const res=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:'createOrder',userId:profile.userId,name,telephone:tel,items,totalPrice:cartTotal(),paymentMethod:method,image:method==='โอนเงิน'?slipBase64:null})});const j=await res.json();if(!j.ok)throw new Error(j.error||'สั่งซื้อไม่สำเร็จ');alert('สั่งซื้อสำเร็จ! 🎉\nหมายเลขคำสั่งซื้อ: '+j.orderId);cart=[];slipBase64=null;closeCart();renderCartBar();if(liff.closeWindow)liff.closeWindow()}catch(e){alert('เกิดข้อผิดพลาด: '+e.message)}finally{btn.disabled=false;btn.textContent='ยืนยันคำสั่งซื้อ'}}
 init();
 </script>
 </body></html>
