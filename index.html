@@ -27,8 +27,9 @@ main{padding:16px}.section-title{font-size:15px;font-weight:700;margin:18px 0 10
 .sheet-add-btn,#confirmBtn{width:100%;padding:14px;margin-top:14px;background:var(--accent);color:#fff;border:0;border-radius:14px;font-size:15.5px;font-weight:700}
 .cart-line{border-bottom:1px dashed var(--line);padding:10px 0;display:flex;justify-content:space-between;gap:10px}.cart-line .d{color:var(--brand-light);font-size:13.5px;margin-top:2px}.cart-line .rm{color:var(--danger);font-size:12px;margin-top:4px;cursor:pointer}.cart-line .p{font-weight:700;white-space:nowrap}.total-line{display:flex;justify-content:space-between;font-size:17px;font-weight:800;margin:16px 0 6px}
 .field-label{display:block;font-size:14px;color:#6b5a48;margin:12px 0 5px;font-weight:600}input[type=text],input[type=tel]{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:10px;font-size:15.5px}.pay-row{display:flex;gap:8px}.pay-row label{flex:1;display:flex;justify-content:center;border:1.5px solid var(--line);border-radius:12px;padding:11px;cursor:pointer}.pay-row .active{border-color:var(--accent);background:#fdf3e8;color:var(--accent-dark);font-weight:700}#slipSection{display:none;margin-top:10px}#slipPreview{max-width:140px;border-radius:10px;margin-top:8px;display:none;border:1px solid var(--line)}
+.bank-box{background:#fdf3e8;border:1.5px solid var(--accent);border-radius:12px;padding:12px 14px;margin-bottom:12px}.bank-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:14.5px}.bank-label{color:var(--brand-light);min-width:64px}.bank-val{font-weight:700;color:var(--brand);flex:1}.copy-btn{background:var(--accent);color:#fff;border:0;padding:5px 10px;border-radius:8px;font-size:12.5px;font-weight:700}
 /* หน้าออเดอร์ */
-#ordersPage{display:none;padding:16px}.orders-top{display:flex;align-items:center;gap:10px;margin:2px 0 14px}.back-btn{border:0;background:#fff;color:var(--brand);border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-weight:700}.orders-title{font-size:20px;font-weight:800}.orders-sub{font-size:13px;color:var(--brand-light);margin-top:3px}.order-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.04)}.order-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.order-id{font-weight:800;font-size:15px}.order-date{font-size:12.5px;color:var(--brand-light);margin-top:3px}.order-total{font-size:18px;font-weight:800;color:var(--accent-dark);white-space:nowrap}.order-items{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}.order-item{font-size:14px;padding:4px 0;display:flex;justify-content:space-between;gap:10px}.order-detail{font-size:12.5px;color:var(--brand-light);margin-top:1px}.badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}.badge{font-size:12px;padding:6px 9px;border-radius:999px;background:#f1ece3;color:#6b5a48}.badge.status{background:#fdf3e8;color:var(--accent-dark)}.badge.done{background:#eaf7ee;color:var(--success)}.empty-orders{background:#fff;border:1px dashed var(--line);border-radius:16px;padding:28px 18px;text-align:center;color:var(--brand-light);line-height:1.7}.refresh-orders{margin-left:auto;border:0;background:var(--accent);color:#fff;border-radius:10px;padding:8px 10px;font-weight:700}
+#ordersPage{display:none;padding:16px}.orders-top{display:flex;align-items:center;gap:10px;margin:2px 0 14px}.back-btn{border:0;background:#fff;color:var(--brand);border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-weight:700}.orders-title{font-size:20px;font-weight:800}.orders-sub{font-size:13px;color:var(--brand-light);margin-top:3px}.order-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.04)}.order-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.order-id{font-weight:800;font-size:15px}.order-date{font-size:12.5px;color:var(--brand-light);margin-top:3px}.order-total{font-size:18px;font-weight:800;color:var(--accent-dark);white-space:nowrap}.order-items{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}.order-item{font-size:14px;padding:4px 0;display:flex;justify-content:space-between;gap:10px}.order-detail{font-size:12.5px;color:var(--brand-light);margin-top:1px}.badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}.badge{font-size:12px;padding:6px 9px;border-radius:999px;background:#f1ece3;color:#6b5a48}.badge.status{background:#fdf3e8;color:var(--accent-dark)}.badge.done{background:#eaf7ee;color:var(--success)}.empty-orders{background:#fff;border:1px dashed var(--line);border-radius:16px;padding:28px 18px;text-align:center;color:var(--brand-light);line-height:1.7}.refresh-orders{margin-left:auto;border:0;background:var(--accent);color:#fff;border-radius:10px;padding:8px 10px;font-weight:700}#sortOrdersBtn{font-size:12.5px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -48,7 +49,8 @@ main{padding:16px}.section-title{font-size:15px;font-weight:700;margin:18px 0 10
 
 <main id="ordersPage">
   <div class="orders-top">
-    <div><div class="orders-title">คำสั่งซื้อของฉัน</div><div class="orders-sub">แสดงคำสั่งซื้อล่าสุดของคุณ</div></div>
+    <div><div class="orders-title">คำสั่งซื้อของฉัน</div><div class="orders-sub" id="ordersSub">แสดงคำสั่งซื้อล่าสุดของคุณ</div></div>
+    <button class="refresh-orders" id="sortOrdersBtn" onclick="toggleOrdersSort()" title="สลับลำดับ">↕ ใหม่สุดก่อน</button>
     <button class="refresh-orders" onclick="loadOrders()">↻</button>
   </div>
   <div id="ordersList"></div>
@@ -70,8 +72,9 @@ main{padding:16px}.section-title{font-size:15px;font-weight:700;margin:18px 0 10
 <label class="field-label">ชื่อผู้รับ *</label><input type="text" id="custName" placeholder="ชื่อ-นามสกุล">
 <label class="field-label">เบอร์โทรศัพท์ *</label><input type="tel" id="custTel" placeholder="0812345678">
 <label class="field-label">วิธีการชำระเงิน</label><div class="pay-row"><label id="payTransferLabel"><input type="radio" name="paymentMethod" value="โอนเงิน" onchange="onPaymentChange()" style="display:none"><span>💸 โอนเงิน</span></label><label id="payShopLabel" class="active"><input type="radio" name="paymentMethod" value="ชำระที่ร้าน" onchange="onPaymentChange()" checked style="display:none"><span>🏪 ชำระที่ร้าน</span></label></div>
-<div id="slipSection"><label class="field-label">แนบสลิปการโอนเงิน</label><input type="file" accept="image/*" onchange="onSlipSelected(event)"><img id="slipPreview"></div><button id="confirmBtn" onclick="confirmOrder()">ยืนยันคำสั่งซื้อ</button>
+<div id="slipSection"><div class="bank-box"><div class="bank-row"><span class="bank-label">ธนาคาร</span><span class="bank-val">กสิกรไทย</span></div><div class="bank-row"><span class="bank-label">เลขบัญชี</span><span class="bank-val" id="bankAccNo">202-1-78181-1</span><button type="button" class="copy-btn" onclick="copyBankAcc()">คัดลอก</button></div><div class="bank-row"><span class="bank-label">ชื่อบัญชี</span><span class="bank-val">เนตรนภา บุญอาจ</span></div></div><label class="field-label">แนบสลิปการโอนเงิน</label><input type="file" accept="image/*" onchange="onSlipSelected(event)"><img id="slipPreview"></div><button id="confirmBtn" onclick="confirmOrder()">ยืนยันคำสั่งซื้อ</button>
 </div></div>
+
 
 <script>
 const API_URL='https://script.google.com/macros/s/AKfycbyXd7Vht8MRECpCWk1XyyVmoB4JSxJFYZBiGuQS027Xq5QHoeyy4LxSIT1rl50u1_sO/exec';
@@ -79,7 +82,9 @@ const LIFF_ID='2011058922-zZ7LXynR';
 const SWEETNESS_OPTIONS=['ปกติ','หวานน้อย','หวานมาก','ไม่หวาน'];
 const DRINK_TYPE_OPTIONS=[{value:'เย็น',label:'🧊 เย็น'},{value:'ปั่น',label:'🥤 ปั่น'},{value:'ร้อน',label:'🔥 ร้อน'}];
 const CONTAINER_OPTIONS=[{value:'แก้ว',label:'🥤 แก้ว'},{value:'ถุง',label:'🛍️ ถุง'}];
+const BANK_ACCOUNT_NO='2021781811';
 let cart=[],profile=null,slipBase64=null,toppingsData=[],currentItem=null,currentDrinkType='',currentContainer='',currentSweetness=SWEETNESS_OPTIONS[0],currentToppings=[],currentQty=1;
+let rawOrders=[],ordersSortDesc=true; // true = ใหม่สุดก่อน, false = เก่าสุดก่อน
 
 function isOrdersPage(){
   const p=new URLSearchParams(location.search).get('page');
@@ -141,9 +146,26 @@ async function loadOrders(){
     if(!res.ok)throw new Error('HTTP Error '+res.status);
     const j=await res.json();
     if(!j.ok)throw new Error(j.error||'โหลดคำสั่งซื้อไม่สำเร็จ');
-    renderOrders(Array.isArray(j.data)?j.data:[]);
+    rawOrders=Array.isArray(j.data)?j.data:[]; // จาก API เรียงใหม่สุดก่อนอยู่แล้ว
+    renderSortedOrders();
     setStatus('','');
   }catch(e){setStatus('โหลดคำสั่งซื้อไม่สำเร็จ: '+(e.message||e),'error')}
+}
+function renderSortedOrders(){
+  const ordered=ordersSortDesc?rawOrders:[...rawOrders].reverse();
+  renderOrders(ordered);
+  const btn=document.getElementById('sortOrdersBtn');
+  if(btn)btn.textContent=ordersSortDesc?'↕ ใหม่สุดก่อน':'↕ เก่าสุดก่อน';
+  const sub=document.getElementById('ordersSub');
+  if(sub)sub.textContent=ordersSortDesc?'แสดงคำสั่งซื้อล่าสุดของคุณ':'แสดงคำสั่งซื้อเก่าสุดของคุณก่อน';
+}
+function toggleOrdersSort(){
+  ordersSortDesc=!ordersSortDesc;
+  renderSortedOrders();
+}
+function copyBankAcc(){
+  const done=()=>{const b=document.querySelector('.copy-btn');if(b){const old=b.textContent;b.textContent='คัดลอกแล้ว ✓';setTimeout(()=>b.textContent=old,1500)}};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(BANK_ACCOUNT_NO).then(done).catch(()=>{})}
 }
 
 async function loadMenu(){try{setStatus('กำลังโหลดเมนู...','loading');const res=await fetch(API_URL+'?action=getMenu',{cache:'no-store'});const json=await res.json();if(!json.ok)throw new Error(json.error);const menu=json.data.menu||[];toppingsData=(json.data.toppings||[]).filter(t=>!t.status||t.status==='available');document.getElementById('menuList').innerHTML=menu.map(m=>{const ok=!m.status||m.status==='available';return `<div class="menu-card">${m.img?`<img src="${m.img}" alt="${m.name}" onerror="this.style.display='none'">`:''}<div class="info"><div class="name">${m.name}</div><div class="price">${m.price} บาท</div></div>${ok?`<button class="add-btn" onclick='openItemModal(${JSON.stringify(m)})'>เลือก</button>`:`<button class="add-btn soldout" disabled>หมด</button>`}</div>`}).join('');document.getElementById('menuSection').style.display='block';setStatus('','')}catch(err){setStatus('โหลดเมนูไม่สำเร็จ: '+err.message,'error')}}
