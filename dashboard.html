@@ -824,6 +824,20 @@ let busy = {
   reports:false
 };
 
+// เวลาที่โหลดข้อมูลแต่ละแท็บล่าสุด (ms) - กันไม่ให้ยิง API ซ้ำตอนสลับแท็บถ้าข้อมูลยังสดอยู่
+let lastLoaded = {
+  home:0,
+  orders:0,
+  menu:0,
+  finance:0,
+  reports:0
+};
+const STALE_MS = 30000; // ข้อมูลถือว่ายังสดอยู่ 30 วินาที
+
+function markStale(page){
+  lastLoaded[page] = 0;
+}
+
 let selectedStart = '';
 let selectedEnd = '';
 let selectedPreset = 'today';
@@ -1315,16 +1329,18 @@ function go(id){
       );
     });
 
+  const fresh = (Date.now() - lastLoaded[id]) < STALE_MS;
+
   if(id === 'home'){
-    loadHome();
+    if(!fresh) loadHome();
   }else if(id === 'orders'){
-    loadOrders();
+    if(!fresh) loadOrders();
   }else if(id === 'menu' || id === 'products'){
-    loadMenu();
+    if(!fresh) loadMenu();
   }else if(id === 'finance'){
-    loadFinance();
+    if(!fresh) loadFinance();
   }else if(id === 'reports'){
-    loadReports();
+    if(!fresh) loadReports();
   }
 }
 
@@ -1639,6 +1655,8 @@ async function loadHome(force=false){
       }]
     );
 
+    lastLoaded.home = Date.now();
+
   }catch(e){
     setStatus(
       'โหลด Dashboard ไม่สำเร็จ: '+e.message,
@@ -1659,6 +1677,7 @@ async function loadOrders(force=false){
   try{
     allOrders = await apiGet('getAllOrders');
     renderOrders();
+    lastLoaded.orders = Date.now();
   }catch(e){
     setStatus(
       'โหลดออเดอร์ไม่สำเร็จ: '+e.message,
@@ -1845,7 +1864,7 @@ async function updateOrderStatus(id,status){
 
     renderOrders();
     toast('อัปเดตสถานะออเดอร์แล้ว');
-    loadHome(true);
+    markStale('home'); // หน้า Home จะดึงข้อมูลใหม่ตอนเข้าครั้งถัดไป ไม่ต้องยิงซ้ำตอนนี้
 
   }catch(e){
     toast('อัปเดตไม่สำเร็จ: '+e.message);
@@ -1891,6 +1910,7 @@ async function loadMenu(force=false){
 
     renderMenu();
     renderToppings();
+    lastLoaded.menu = Date.now();
 
   }catch(e){
     setStatus(
@@ -2011,10 +2031,15 @@ async function toggleMenu(id){
 
   if(!x) return;
 
+  const prevStatus = x.status;
   const status =
     x.status === 'soldout'
       ? 'available'
       : 'soldout';
+
+  // อัปเดตหน้าจอทันที (optimistic) ไม่ต้องรอ API เพื่อให้กดสวิตช์แล้วรู้สึกไว
+  x.status = status;
+  renderMenu();
 
   try{
     await apiPost({
@@ -2023,18 +2048,17 @@ async function toggleMenu(id){
       status
     });
 
-    x.status = status;
-    renderMenu();
-
     toast(
       status === 'soldout'
         ? 'ปิดเมนูแล้ว'
         : 'เปิดเมนูแล้ว'
     );
 
-    loadHome(true);
+    markStale('home'); // ไม่ยิง loadHome ซ้ำตอนนี้ รอโหลดใหม่ตอนเข้าแท็บ Home ครั้งถัดไป
 
   }catch(e){
+    x.status = prevStatus; // ย้อนกลับถ้าบันทึกไม่สำเร็จ
+    renderMenu();
     toast('บันทึกไม่สำเร็จ: '+e.message);
   }
 }
@@ -2046,10 +2070,14 @@ async function toggleTopping(id){
 
   if(!x) return;
 
+  const prevStatus = x.status;
   const status =
     x.status === 'soldout'
       ? 'available'
       : 'soldout';
+
+  x.status = status;
+  renderToppings();
 
   try{
     await apiPost({
@@ -2058,18 +2086,17 @@ async function toggleTopping(id){
       status
     });
 
-    x.status = status;
-    renderToppings();
-
     toast(
       status === 'soldout'
         ? 'ปิดท็อปปิ้งแล้ว'
         : 'เปิดท็อปปิ้งแล้ว'
     );
 
-    loadHome(true);
+    markStale('home');
 
   }catch(e){
+    x.status = prevStatus;
+    renderToppings();
     toast('บันทึกไม่สำเร็จ: '+e.message);
   }
 }
@@ -2165,23 +2192,24 @@ async function saveMenu(id){
   }
 
   try{
+    let saved;
+
     if(id){
-      await apiPost({
+      // ส่งสถานะไปพร้อมกันในคำขอเดียว ไม่ต้องยิง API สองรอบ
+      saved = await apiPost({
         action:'updateMenu',
         id,
         name,
         price,
         category,
-        img
-      });
-
-      await apiPost({
-        action:'updateMenuStatus',
-        id,
+        img,
         status
       });
+
+      const x = menu.find(m=>String(m.id) === String(id));
+      if(x) Object.assign(x, saved || {name, price, category, img, status});
     }else{
-      await apiPost({
+      saved = await apiPost({
         action:'addMenu',
         name,
         price,
@@ -2189,10 +2217,13 @@ async function saveMenu(id){
         img,
         status
       });
+
+      if(saved) menu.push(saved);
     }
 
     closeModal();
-    await loadMenu(true);
+    renderMenu();
+    markStale('home');
 
     toast(
       id
@@ -2227,7 +2258,7 @@ async function deleteMenu(id){
 
     renderMenu();
     toast('ลบเมนูแล้ว');
-    loadHome(true);
+    markStale('home');
 
   }catch(e){
     toast('ลบเมนูไม่สำเร็จ: '+e.message);
@@ -2309,30 +2340,33 @@ async function saveTopping(id){
   }
 
   try{
+    let saved;
+
     if(id){
-      await apiPost({
+      saved = await apiPost({
         action:'updateTopping',
         id,
         name,
-        price
-      });
-
-      await apiPost({
-        action:'updateToppingStatus',
-        id,
+        price,
         status
       });
+
+      const x = toppings.find(t=>String(t.id) === String(id));
+      if(x) Object.assign(x, saved || {name, price, status});
     }else{
-      await apiPost({
+      saved = await apiPost({
         action:'addTopping',
         name,
         price,
         status
       });
+
+      if(saved) toppings.push(saved);
     }
 
     closeModal();
-    await loadMenu(true);
+    renderToppings();
+    markStale('home');
 
     toast(
       id
@@ -2367,7 +2401,7 @@ async function deleteTopping(id){
 
     renderToppings();
     toast('ลบท็อปปิ้งแล้ว');
-    loadHome(true);
+    markStale('home');
 
   }catch(e){
     toast('ลบไม่สำเร็จ: '+e.message);
@@ -2389,6 +2423,7 @@ async function loadFinance(force=false){
     }
 
     renderFinance();
+    lastLoaded.finance = Date.now();
 
   }catch(e){
     setStatus(
@@ -2630,6 +2665,7 @@ async function loadReports(force=false){
         selectedEnd
       );
     }
+    lastLoaded.reports = Date.now();
   }catch(e){
     setStatus(
       'โหลดรายงานไม่สำเร็จ: '+e.message,
