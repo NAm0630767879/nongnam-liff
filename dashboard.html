@@ -2347,14 +2347,10 @@ function openMenuModal(id=''){
       </div>
 
       <div class="modal-field full">
-        <label>อัปโหลดรูปภาพจากเครื่อง</label>
+        <label>รูปภาพเมนู (อัปโหลดไฟล์ขึ้น Drive เท่านั้น)</label>
         <input id="mImgFile" type="file" accept="image/*" onchange="onMenuImageSelected(event)">
+        <input id="mImg" type="hidden" value="${esc(x?.img || '')}">
         <img id="mImgPreview" src="${esc(x?.img || '')}" style="display:${x?.img ? 'block' : 'none'};max-width:120px;border-radius:10px;margin-top:8px;border:1px solid var(--line)">
-      </div>
-
-      <div class="modal-field full">
-        <label>หรือ URL รูปภาพ (ถ้าไม่อัปโหลดไฟล์)</label>
-        <input id="mImg" value="${esc(x?.img || '')}">
       </div>
 
     </div>
