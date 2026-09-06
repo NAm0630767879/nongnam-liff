@@ -834,9 +834,6 @@ button{cursor:pointer}
 const API_URL =
   'https://script.google.com/macros/s/AKfycbyXd7Vht8MRECpCWk1XyyVmoB4JSxJFYZBiGuQS027Xq5QHoeyy4LxSIT1rl50u1_sO/exec';
 
-const ADMIN_USERNAME = 'nongnam';
-const ADMIN_PASSWORD = 'nongnam2569';
-
 let allOrders = [];
 let allExpenses = [];
 let menu = [];
@@ -876,16 +873,37 @@ const MENU_CATEGORIES = ['ชา','นม','กาแฟ','ผลไม้','โ
 
 /* ========================= LOGIN ========================= */
 
-function login(){
+async function login(){
   const username = document.getElementById('user').value.trim();
   const password = document.getElementById('pass').value;
+  const error = document.getElementById('error');
+  const btn = document.querySelector('.login-btn');
 
-  if(username === ADMIN_USERNAME && password === ADMIN_PASSWORD){
-    sessionStorage.setItem('nn_admin_ok','1');
-    showApp();
-  }else{
-    const error = document.getElementById('error');
-    if(error) error.style.display = 'block';
+  if(error) error.style.display = 'none';
+  if(btn){ btn.disabled = true; btn.textContent = 'กำลังตรวจสอบ...'; }
+
+  try{
+    // ตรวจสอบชื่อผู้ใช้/รหัสผ่านที่ฝั่ง Server เท่านั้น (ไม่มีรหัสผ่านฝังอยู่ในหน้าเว็บอีกต่อไป)
+    const result = await fetch(API_URL,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'adminLogin', username, password})
+    }).then(r=>r.json());
+
+    if(result.ok){
+      // เก็บ token ที่ server ออกให้ ไม่ใช่รหัสผ่าน และ token หมดอายุอัตโนมัติฝั่ง server
+      sessionStorage.setItem('nn_admin_token', result.data.token);
+      showApp();
+    }else{
+      if(error) error.style.display = 'block';
+    }
+  }catch(err){
+    if(error){
+      error.textContent = 'เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่';
+      error.style.display = 'block';
+    }
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ'; }
   }
 }
 
@@ -894,7 +912,7 @@ document.getElementById('pass').addEventListener('keydown', e => {
 });
 
 function logout(){
-  sessionStorage.removeItem('nn_admin_ok');
+  sessionStorage.removeItem('nn_admin_token');
   location.reload();
 }
 
@@ -1232,7 +1250,7 @@ function showApp(){
   loadHome(true);
 }
 
-if(sessionStorage.getItem('nn_admin_ok') === '1'){
+if(sessionStorage.getItem('nn_admin_token')){
   showApp();
 }
 
@@ -1259,17 +1277,25 @@ async function apiGet(action,params={}){
 }
 
 async function apiPost(data){
+  // แนบ token ที่ได้จากตอน login ไปกับทุกคำขอ ฝั่ง Server จะเป็นคนตรวจสอบสิทธิ์เอง
+  const token = sessionStorage.getItem('nn_admin_token') || '';
+
   const r = await fetch(API_URL,{
     method:'POST',
     headers:{
       'Content-Type':'text/plain;charset=utf-8'
     },
-    body:JSON.stringify(data)
+    body:JSON.stringify({...data, token})
   });
 
   const j = await r.json();
 
   if(!j.ok){
+    // ถ้า token หมดอายุ/ไม่ถูกต้อง ให้เด้งกลับไปหน้า login ใหม่
+    if(j.error === 'SESSION_EXPIRED'){
+      sessionStorage.removeItem('nn_admin_token');
+      location.reload();
+    }
     throw Error(j.error || 'เกิดข้อผิดพลาด');
   }
 
