@@ -143,6 +143,12 @@ button{cursor:pointer}
 .b-ready{background:#e4f4e6;color:#4d8657}
 .b-done{background:#eee;color:#666}
 .b-out{background:#fde9e9;color:#b84b4b}
+.b-cancel-pending{background:#fff0da;color:#c94b4b;animation:pulseCancel 1.6s ease-in-out infinite}
+@keyframes pulseCancel{0%,100%{opacity:1}50%{opacity:.55}}
+.cancel-actions{display:flex;gap:8px;margin-top:8px}
+.cancel-actions button{flex:1;border-radius:9px;padding:9px 10px;font-size:12.5px;font-weight:800;border:1px solid var(--line)}
+.cancel-actions .confirm-cancel{background:var(--red);border-color:var(--red);color:#fff}
+.cancel-actions .reject-cancel{background:#fff;color:var(--brown)}
 
 .searchbar{display:flex;gap:9px;margin-bottom:14px}
 .searchbar input,.searchbar select{
@@ -571,6 +577,11 @@ button{cursor:pointer}
     </div>
   </div>
 
+  <div id="cancelAlert" style="display:none;background:#fff0da;border:1.5px solid #e8b877;border-radius:14px;padding:12px 16px;margin-bottom:16px;align-items:center;justify-content:space-between;gap:10px;cursor:pointer" onclick="go('orders');document.getElementById('orderFilter').value='รอยืนยันการยกเลิก';renderOrders()">
+    <div><b>⚠️ มีคำขอยกเลิกคำสั่งซื้อรอตรวจสอบ</b><div style="font-size:12px;color:var(--muted);margin-top:2px" id="cancelAlertText"></div></div>
+    <span style="font-weight:900;color:var(--orange2)">ตรวจสอบ →</span>
+  </div>
+
   <div class="cards">
     <div class="card kpi">
       <div class="icon">💰</div>
@@ -634,6 +645,8 @@ button{cursor:pointer}
       <option>กำลังชง</option>
       <option>พร้อมรับ</option>
       <option>เสร็จสิ้น</option>
+      <option>รอยืนยันการยกเลิก</option>
+      <option>ยกเลิกแล้ว</option>
     </select>
   </div>
 
@@ -790,6 +803,20 @@ button{cursor:pointer}
       <div id="bestMenu"></div>
     </div>
   </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="page-head" style="margin-bottom:12px">
+      <div>
+        <h3>📊 สถิติยอดขายรายเดือน (นับเฉพาะออเดอร์ที่เสร็จสิ้น)</h3>
+        <p style="font-size:12px;color:var(--muted);margin-top:4px">เปรียบเทียบยอดขายเดือนมกราคม–ธันวาคม ของปีที่เลือก</p>
+      </div>
+      <div class="date-field" style="min-width:130px">
+        <label>ปี</label>
+        <select id="monthlySalesYear" onchange="loadMonthlySales(this.value)"></select>
+      </div>
+    </div>
+    <div class="chart"><canvas id="monthlySalesChart"></canvas></div>
+  </div>
 </section>
 
 </main>
@@ -815,6 +842,7 @@ let allExpenses = [];
 let menu = [];
 let toppings = [];
 let charts = {};
+let menuImageBase64 = ''; // เก็บรูปภาพเมนูที่เลือกอัปโหลด (base64) ก่อนกดบันทึก
 
 let busy = {
   home:false,
@@ -1368,6 +1396,8 @@ function statusClass(s){
   if(s === 'กำลังชง') return 'b-making';
   if(s === 'พร้อมรับ') return 'b-ready';
   if(s === 'เสร็จสิ้น') return 'b-done';
+  if(s === 'รอยืนยันการยกเลิก') return 'b-cancel-pending';
+  if(s === 'ยกเลิกแล้ว') return 'b-out';
   return 'b-out';
 }
 
@@ -1594,6 +1624,18 @@ async function loadHome(force=false){
       soldOutMenus.length + soldOutToppings.length
     );
 
+    const pendingCancel = d.pendingCancelOrders || [];
+    const cancelAlert = document.getElementById('cancelAlert');
+
+    if(cancelAlert){
+      if(pendingCancel.length){
+        cancelAlert.style.display = 'flex';
+        safeText('cancelAlertText', pendingCancel.map(o=>o.orderId).join(', '));
+      }else{
+        cancelAlert.style.display = 'none';
+      }
+    }
+
     // แสดงออเดอร์ที่ยังไม่เสร็จ โดยเอาจาก Orders จริง
     const active = allOrders
       .filter(o => o.orderStatus !== 'เสร็จสิ้น')
@@ -1749,6 +1791,15 @@ function renderOrders(){
           </span>
         </div>
 
+        ${
+          o.orderStatus === 'รอยืนยันการยกเลิก'
+            ? `<div class="cancel-actions">
+                <button class="confirm-cancel" onclick="confirmCancelOrder('${esc(o.orderId)}')">✅ ยืนยันการยกเลิก</button>
+                <button class="reject-cancel" onclick="rejectCancelOrder('${esc(o.orderId)}')">❌ ไม่อนุมัติ</button>
+              </div>`
+            : ''
+        }
+
         <div class="actions">
 
           <button onclick="viewOrder('${esc(o.orderId)}')">
@@ -1892,6 +1943,54 @@ async function updatePaymentStatus(id,status){
 
   }catch(e){
     toast('อัปเดตไม่สำเร็จ: '+e.message);
+  }
+}
+
+async function confirmCancelOrder(id){
+  if(!confirm('ยืนยันการยกเลิกคำสั่งซื้อ '+id+' ใช่หรือไม่?')) return;
+
+  try{
+    await apiPost({
+      action:'confirmCancelOrder',
+      orderId:id
+    });
+
+    const o = allOrders.find(
+      x=>String(x.orderId) === String(id)
+    );
+
+    if(o) o.orderStatus = 'ยกเลิกแล้ว';
+
+    renderOrders();
+    toast('ยืนยันการยกเลิกแล้ว');
+    markStale('home');
+
+  }catch(e){
+    toast('ยืนยันการยกเลิกไม่สำเร็จ: '+e.message);
+  }
+}
+
+async function rejectCancelOrder(id){
+  if(!confirm('ไม่อนุมัติคำขอยกเลิกคำสั่งซื้อ '+id+' ใช่หรือไม่? สถานะจะกลับไปเป็นเดิม')) return;
+
+  try{
+    const result = await apiPost({
+      action:'rejectCancelOrder',
+      orderId:id
+    });
+
+    const o = allOrders.find(
+      x=>String(x.orderId) === String(id)
+    );
+
+    if(o) o.orderStatus = (result && result.orderStatus) || o.orderStatus;
+
+    renderOrders();
+    toast('ไม่อนุมัติการยกเลิกแล้ว');
+    markStale('home');
+
+  }catch(e){
+    toast('ดำเนินการไม่สำเร็จ: '+e.message);
   }
 }
 
@@ -2156,7 +2255,13 @@ function openMenuModal(id=''){
       </div>
 
       <div class="modal-field full">
-        <label>URL รูปภาพ</label>
+        <label>อัปโหลดรูปภาพจากเครื่อง</label>
+        <input id="mImgFile" type="file" accept="image/*" onchange="onMenuImageSelected(event)">
+        <img id="mImgPreview" src="${esc(x?.img || '')}" style="display:${x?.img ? 'block' : 'none'};max-width:120px;border-radius:10px;margin-top:8px;border:1px solid var(--line)">
+      </div>
+
+      <div class="modal-field full">
+        <label>หรือ URL รูปภาพ (ถ้าไม่อัปโหลดไฟล์)</label>
         <input id="mImg" value="${esc(x?.img || '')}">
       </div>
 
@@ -2169,6 +2274,27 @@ function openMenuModal(id=''){
       </button>
     </div>
   `);
+
+  menuImageBase64 = '';
+}
+
+function onMenuImageSelected(e){
+  const f = e.target.files[0];
+  if(!f) return;
+
+  const reader = new FileReader();
+
+  reader.onload = x => {
+    menuImageBase64 = x.target.result;
+
+    const preview = document.getElementById('mImgPreview');
+    if(preview){
+      preview.src = menuImageBase64;
+      preview.style.display = 'block';
+    }
+  };
+
+  reader.readAsDataURL(f);
 }
 
 async function saveMenu(id){
@@ -2193,9 +2319,11 @@ async function saveMenu(id){
 
   try{
     let saved;
+    const imagePayload = menuImageBase64 ? { image: menuImageBase64 } : {};
 
     if(id){
       // ส่งสถานะไปพร้อมกันในคำขอเดียว ไม่ต้องยิง API สองรอบ
+      // ถ้ามีการอัปโหลดรูปใหม่ (image) จะถูกบันทึกลง Product_Images แทนที่รูปเดิม
       saved = await apiPost({
         action:'updateMenu',
         id,
@@ -2203,7 +2331,8 @@ async function saveMenu(id){
         price,
         category,
         img,
-        status
+        status,
+        ...imagePayload
       });
 
       const x = menu.find(m=>String(m.id) === String(id));
@@ -2215,12 +2344,14 @@ async function saveMenu(id){
         price,
         category,
         img,
-        status
+        status,
+        ...imagePayload
       });
 
       if(saved) menu.push(saved);
     }
 
+    menuImageBase64 = '';
     closeModal();
     renderMenu();
     markStale('home');
@@ -2665,6 +2796,10 @@ async function loadReports(force=false){
         selectedEnd
       );
     }
+
+    ensureMonthlySalesYearOptions();
+    await loadMonthlySales();
+
     lastLoaded.reports = Date.now();
   }catch(e){
     setStatus(
@@ -2673,6 +2808,51 @@ async function loadReports(force=false){
     );
   }finally{
     busy.reports = false;
+  }
+}
+
+/* ========================= MONTHLY SALES (YEAR SELECTOR) ========================= */
+
+const THAI_MONTH_LABELS = [
+  'ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
+  'ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'
+];
+
+function ensureMonthlySalesYearOptions(){
+  const sel = document.getElementById('monthlySalesYear');
+  if(!sel || sel.options.length) return; // เติมตัวเลือกแค่ครั้งแรก
+
+  const currentYearBE = new Date().getFullYear() + 543;
+
+  for(let y = currentYearBE; y >= currentYearBE - 4; y--){
+    const opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = 'ปี ' + y;
+    sel.appendChild(opt);
+  }
+}
+
+async function loadMonthlySales(yearBE){
+  const sel = document.getElementById('monthlySalesYear');
+  const year = yearBE || (sel ? sel.value : '') || (new Date().getFullYear() + 543);
+
+  if(sel) sel.value = String(year);
+
+  try{
+    const d = await apiGet('getMonthlySales', { year });
+
+    draw(
+      'monthlySalesChart',
+      'monthlySales',
+      'bar',
+      THAI_MONTH_LABELS,
+      [{
+        label: 'ยอดขาย ปี ' + (d.yearBE || year),
+        data: d.months || new Array(12).fill(0)
+      }]
+    );
+  }catch(e){
+    toast('โหลดสถิติยอดขายรายเดือนไม่สำเร็จ: ' + e.message);
   }
 }
 
