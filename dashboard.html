@@ -231,6 +231,15 @@ button{cursor:pointer}
 .positive{color:var(--green)}
 .negative{color:var(--red)}
 
+.finance-table{width:100%;border-collapse:collapse;font-size:14.5px}
+.finance-table td{padding:12px 6px;border-bottom:1px dashed var(--line)}
+.finance-table td.amt{text-align:right;font-weight:800;white-space:nowrap}
+.finance-table td.amt.positive{color:var(--green)}
+.finance-table td.amt.negative{color:var(--red)}
+.finance-table tr.total-row td{border-bottom:0;border-top:2px solid var(--line);padding-top:15px;font-weight:900;font-size:16px}
+.finance-table tr.total-row td.amt.positive{color:var(--green)}
+.finance-table tr.total-row td.amt.negative{color:var(--red)}
+
 .expense{
   display:flex;justify-content:space-between;gap:10px;padding:12px 0;
   border-bottom:1px dashed var(--line)
@@ -811,6 +820,26 @@ button{cursor:pointer}
     </div>
   </div>
 
+  <div class="card" style="margin-top:16px">
+    <h3>🧮 สรุปกำไร–ขาดทุน (หักรายจ่าย)</h3>
+    <table class="finance-table">
+      <tbody>
+        <tr>
+          <td>ยอดขาย (รายรับ)</td>
+          <td class="amt positive" id="fbSales">0 บาท</td>
+        </tr>
+        <tr>
+          <td>หัก: รายจ่าย</td>
+          <td class="amt negative" id="fbExpenses">0 บาท</td>
+        </tr>
+        <tr class="total-row">
+          <td>กำไร/ขาดทุนสุทธิ</td>
+          <td class="amt" id="fbNet">0 บาท</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <div class="grid2" style="margin-top:16px">
     <div class="card">
       <h3>📈 ยอดขายรายสัปดาห์ 6 เดือน</h3>
@@ -1187,6 +1216,23 @@ async function loadSelectedReport(
     if(profitEl){
       profitEl.title =
         `รายจ่าย ${money(d.expenses || 0)} บาท · กำไร ${money(d.profit || 0)} บาท`;
+    }
+
+    const netProfit = (typeof d.profit === 'number')
+      ? d.profit
+      : Number(d.sales || 0) - Number(d.expenses || 0);
+
+    safeText('fbSales',money(d.sales || 0)+' บาท');
+    safeText('fbExpenses','- '+money(d.expenses || 0)+' บาท');
+    safeText(
+      'fbNet',
+      (netProfit < 0 ? '- ' : '')+money(Math.abs(netProfit))+' บาท'
+    );
+
+    const fbNetEl = document.getElementById('fbNet');
+    if(fbNetEl){
+      fbNetEl.classList.toggle('positive', netProfit >= 0);
+      fbNetEl.classList.toggle('negative', netProfit < 0);
     }
 
     // เมนูขายดี: API รุ่นปัจจุบันยังไม่ได้ส่ง bestMenu มา
