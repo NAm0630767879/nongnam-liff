@@ -740,11 +740,8 @@ button{cursor:pointer}
 
   <div class="grid2">
     <div class="card">
-      <h3>💡 บันทึกรายจ่าย</h3>
-      <p style="color:var(--muted);font-size:13px">
-        กด “＋ เพิ่มรายจ่าย” เพื่อบันทึกค่าใช้จ่าย
-        และสามารถแก้ไขหรือลบรายการย้อนหลังได้
-      </p>
+      <h3>📊 รายรับ–รายจ่ายรายวัน (เดือนนี้)</h3>
+      <div class="chart"><canvas id="financeChart"></canvas></div>
     </div>
 
     <div class="card">
@@ -2658,6 +2655,8 @@ function renderFinance(){
   safeText('fExpense',money(expense)+' บาท');
   safeText('fNet',money(income-expense)+' บาท');
 
+  renderFinanceChart(s, e);
+
   const el = document.getElementById('expenseList');
 
   if(!el) return;
@@ -2693,6 +2692,102 @@ function renderFinance(){
       </div>
     `).join('')
     : `<div class="empty">ยังไม่มีรายจ่าย</div>`;
+}
+
+function renderFinanceChart(start,end){
+  const el = document.getElementById('financeChart');
+  if(!el) return;
+
+  const year = start.getFullYear();
+  const month = start.getMonth();
+  const daysInMonth = end.getDate();
+
+  const incomeByDay = new Array(daysInMonth).fill(0);
+  const expenseByDay = new Array(daysInMonth).fill(0);
+
+  allOrders.forEach(o=>{
+    if(o.orderStatus !== 'เสร็จสิ้น' || !o.timestamp) return;
+    const d = new Date(o.timestamp);
+    if(d.getFullYear() === year && d.getMonth() === month){
+      incomeByDay[d.getDate()-1] += Number(o.totalPrice || 0);
+    }
+  });
+
+  allExpenses.forEach(x=>{
+    if(!x.date) return;
+    const d = new Date(x.date);
+    if(d.getFullYear() === year && d.getMonth() === month){
+      expenseByDay[d.getDate()-1] += Number(x.amount || 0);
+    }
+  });
+
+  const labels = Array.from({length:daysInMonth},(_,i)=>String(i+1));
+
+  if(charts.financeTrend){
+    try{ charts.financeTrend.destroy(); }catch(e){}
+  }
+
+  charts.financeTrend = new Chart(el,{
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        {
+          label:'รายรับ',
+          data:incomeByDay,
+          borderColor:'#16a34a',
+          backgroundColor:'rgba(22,163,74,.12)',
+          tension:.3,
+          fill:true,
+          pointRadius:2,
+          borderWidth:2
+        },
+        {
+          label:'รายจ่าย',
+          data:expenseByDay,
+          borderColor:'#ef4444',
+          backgroundColor:'rgba(239,68,68,.12)',
+          tension:.3,
+          fill:true,
+          pointRadius:2,
+          borderWidth:2
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{intersect:false,mode:'index'},
+      plugins:{
+        legend:{
+          display:true,
+          position:'top',
+          align:'end',
+          labels:{boxWidth:11,font:{size:11,family:'Prompt'}}
+        },
+        tooltip:{
+          callbacks:{
+            label:function(context){
+              return context.dataset.label+': '+money(context.parsed.y)+' บาท';
+            }
+          }
+        }
+      },
+      scales:{
+        x:{
+          title:{display:true,text:'วันที่ในเดือนนี้',font:{size:11,family:'Prompt'}}
+        },
+        y:{
+          beginAtZero:true,
+          ticks:{
+            callback:function(value){
+              return money(value);
+            }
+          }
+        }
+      }
+    }
+  });
 }
 
 function openExpenseModal(id=''){
