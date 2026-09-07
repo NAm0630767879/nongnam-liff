@@ -36,7 +36,7 @@ header::before{content:'';position:absolute;inset:0;background:radial-gradient(c
 #cartIconBtn:active{transform:scale(.9);background:rgba(255,255,255,.35)}
 #cartIconBadge{position:absolute;top:-5px;right:-5px;background:var(--teal);color:#fff;font-size:11px;font-weight:800;min-width:19px;height:19px;border-radius:10px;display:none;align-items:center;justify-content:center;padding:0 5px;border:2px solid #e2711d;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 
-#status{margin:14px 16px 0;padding:13px 15px;border-radius:14px;font-size:14px;line-height:1.5;font-weight:500;box-shadow:var(--shadow-sm)}.loading{background:#fff3e6;color:#a5690b}.error{background:#fdeceC;background:#fdecec;color:var(--danger);white-space:pre-wrap}
+#status{margin:14px 16px 0;padding:13px 15px;border-radius:14px;font-size:14px;line-height:1.5;font-weight:500;box-shadow:var(--shadow-sm)}.loading{background:#fff3e6;color:#a5690b}.error{background:#fdecec;color:var(--danger);white-space:pre-wrap}
 
 main{padding:16px}.section-title{font-size:16px;font-weight:800;margin:18px 0 12px;display:flex;align-items:center;gap:8px}
 .menu-grid{display:flex;flex-direction:column;gap:12px}
@@ -90,7 +90,6 @@ input[type=text]:focus,input[type=tel]:focus{outline:none;border-color:var(--acc
 
 .pricing-note{border-radius:16px!important;box-shadow:var(--shadow-sm)}
 
-/* หน้าออเดอร์ */
 #ordersPage{display:none;padding:16px}
 .orders-top{display:flex;align-items:center;gap:10px;margin:2px 0 16px}
 .back-btn{border:0;background:#fff;color:var(--brand);border:1px solid var(--line);border-radius:14px;padding:10px 13px;font-weight:700;box-shadow:var(--shadow-sm)}
@@ -156,7 +155,6 @@ input[type=text]:focus,input[type=tel]:focus{outline:none;border-color:var(--acc
 <div id="slipSection"><div class="bank-box"><div class="bank-row"><span class="bank-label">ธนาคาร</span><span class="bank-val">กสิกรไทย</span></div><div class="bank-row"><span class="bank-label">เลขบัญชี</span><span class="bank-val" id="bankAccNo">202-1-78181-1</span><button type="button" class="copy-btn" onclick="copyBankAcc()">คัดลอก</button></div><div class="bank-row"><span class="bank-label">ชื่อบัญชี</span><span class="bank-val">เนตรนภา บุญอาจ</span></div></div><label class="field-label">แนบสลิปการโอนเงิน</label><input type="file" accept="image/*" onchange="onSlipSelected(event)"><img id="slipPreview"></div><button id="confirmBtn" onclick="confirmOrder()">ยืนยันคำสั่งซื้อ</button>
 </div></div>
 
-
 <script>
 const API_URL='https://script.google.com/macros/s/AKfycbyXd7Vht8MRECpCWk1XyyVmoB4JSxJFYZBiGuQS027Xq5QHoeyy4LxSIT1rl50u1_sO/exec';
 const LIFF_ID='2011058922-zZ7LXynR';
@@ -165,7 +163,7 @@ const DRINK_TYPE_OPTIONS=[{value:'เย็น',label:'🧊 เย็น'},{valu
 const CONTAINER_OPTIONS=[{value:'แก้ว',label:'🥤 แก้ว'},{value:'ถุง',label:'🛍️ ถุง'}];
 const BANK_ACCOUNT_NO='2021781811';
 let cart=[],profile=null,slipBase64=null,toppingsData=[],currentItem=null,currentDrinkType='',currentContainer='',currentSweetness=SWEETNESS_OPTIONS[0],currentToppings=[],currentQty=1;
-let rawOrders=[],ordersSortDesc=true; // true = ใหม่สุดก่อน, false = เก่าสุดก่อน
+let rawOrders=[],ordersSortDesc=true;
 
 function isOrdersPage(){
   const p=new URLSearchParams(location.search).get('page');
@@ -242,7 +240,7 @@ async function loadOrders(){
     if(!res.ok)throw new Error('HTTP Error '+res.status);
     const j=await res.json();
     if(!j.ok)throw new Error(j.error||'โหลดคำสั่งซื้อไม่สำเร็จ');
-    rawOrders=Array.isArray(j.data)?j.data:[]; // จาก API เรียงใหม่สุดก่อนอยู่แล้ว
+    rawOrders=Array.isArray(j.data)?j.data:[];
     renderSortedOrders();
     setStatus('','');
   }catch(e){setStatus('โหลดคำสั่งซื้อไม่สำเร็จ: '+(e.message||e),'error')}
